@@ -1,28 +1,32 @@
 const { useState, useEffect, useRef, useCallback } = React;
 
     const DARK = {
-      bg:"#050810", bgCard:"#0a0f1e", bgCardHover:"#0d1428",
+      bg:"#04060f", bgCard:"#090e1c", bgCardHover:"#0d1428",
       bgGlass:"rgba(255,255,255,0.03)",
       cyan:"#38bdf8", cyanGlow:"#0ea5e9",
       green:"#34d399", greenGlow:"#10b981",
       purple:"#a78bfa", purpleGlow:"#8b5cf6",
       red:"#f87171", yellow:"#fbbf24",
-      border:"#1e2d45", borderBright:"#2a3f5f",
-      text:"#e2e8f0", textMuted:"#64748b", textDim:"#2d3f55",
+      border:"#1a2840", borderBright:"#243550",
+      text:"#e8edf5", textMuted:"#5a7090", textDim:"#1e2e44",
       logoBlue:"#38bdf8",
       accent1:"#38bdf8", accent2:"#a78bfa",
+      navBg:"#04060f", cardShadow:"0 2px 16px rgba(0,0,0,0.5)",
+      inputBg:"rgba(255,255,255,0.04)", inputBorder:"#1a2840",
     };
     const LIGHT = {
-      bg:"#d6dce8", bgCard:"#dde3ef", bgCardHover:"#d0d8e6",
-      bgGlass:"rgba(0,0,0,0.03)",
+      bg:"#f0f4fa", bgCard:"#ffffff", bgCardHover:"#f5f8ff",
+      bgGlass:"rgba(0,0,0,0.02)",
       cyan:"#0369a1", cyanGlow:"#0284c7",
       green:"#047857", greenGlow:"#059669",
       purple:"#6d28d9", purpleGlow:"#7c3aed",
-      red:"#b91c1c", yellow:"#b45309",
-      border:"#b8c4d8", borderBright:"#a4b4cc",
-      text:"#0f1629", textMuted:"#4a5568", textDim:"#8896aa",
+      red:"#dc2626", yellow:"#d97706",
+      border:"#dde5f0", borderBright:"#c8d5e8",
+      text:"#0f1629", textMuted:"#556070", textDim:"#b0bdd0",
       logoBlue:"#0369a1",
       accent1:"#0369a1", accent2:"#6d28d9",
+      navBg:"#ffffff", cardShadow:"0 2px 12px rgba(0,0,0,0.08)",
+      inputBg:"rgba(0,0,0,0.03)", inputBorder:"#dde5f0",
     };
 
     // Base portfolio — prices get overwritten by live data
@@ -73,15 +77,15 @@ const { useState, useEffect, useRef, useCallback } = React;
     const AI_LIMIT = 9999;
 
     // ── API helpers ──────────────────────────────────────────────────────────────
-    async function fetchQuote(symbol) {
+    async function fetchQuote(symbol, finnhubKey) {
       const r = await fetch(`/api/finnhub?endpoint=quote&symbol=${encodeURIComponent(symbol)}`);
       if (!r.ok) throw new Error(`Finnhub ${r.status}`);
-      return r.json();
+      return r.json(); // { c: currentPrice, d: change, dp: changePct, o, h, l, pc }
     }
 
-    async function fetchMarketIndices() {
+    async function fetchMarketIndices(finnhubKey) {
       const symbols = ["^GSPC","^IXIC","^DJI"];
-      const results = await Promise.allSettled(symbols.map(s => fetchQuote(s)));
+      const results = await Promise.allSettled(symbols.map(s => fetchQuote(s, finnhubKey)));
       return results.map((r, i) => ({
         symbol: symbols[i],
         data: r.status === "fulfilled" ? r.value : null,
@@ -587,7 +591,7 @@ const { useState, useEffect, useRef, useCallback } = React;
         // Try to get live price if finnhubKey exists
         if (finnhubKey) {
           try {
-            const q = await fetchQuote(data.symbol);
+            const q = await fetchQuote(data.symbol, finnhubKey);
             if (q.c > 0) { newH.price = q.c; newH.change = q.dp || 0; newH.live = true; }
           } catch {}
         }
@@ -789,7 +793,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       const [apiError, setApiError] = useState("");
       const endRef = useRef(null);
       const remaining = AI_LIMIT - aiUsed;
-      const hasKey = true; // key is server-side
+      const hasKey = !!anthropicKey;
 
       useEffect(() => { endRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
@@ -808,6 +812,7 @@ const { useState, useEffect, useRef, useCallback } = React;
         setLoading(true);
         try {
           const aiText = await callClaude({
+            anthropicKey,
             system: `You are Stockr AI's Financial Companion — a sharp, intelligent assistant built into a personal portfolio intelligence dashboard. You have deep knowledge of financial markets, investing strategy, macroeconomics, and portfolio management.
 
 ## Personality
@@ -949,10 +954,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         setLoading(true); setError(""); setArticles([]);
 
         // ── Alpha Vantage (preferred, has sentiment) ──────────────────────────
-        if (newsKey) {
+        try {
           try {
-            let url = `/api/news?category=${encodeURIComponent(category)}`;
-            const r = await fetch(url);
+            const r = await fetch(`/api/news?category=${encodeURIComponent(category)}`);
             if (!r.ok) throw new Error(`${r.status}`);
             const data = await r.json();
             if (data.Information || data.Note) throw new Error("API limit reached");
@@ -975,17 +979,17 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         }
 
         // ── Finnhub fallback (free, no sentiment) ─────────────────────────────
-        if (finnhubKey) {
+        try {
           try {
-            let url;
             const today = new Date().toISOString().slice(0,10);
             const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+            let endpoint;
             if (category === "general" || category === "forex") {
-              url = `/api/finnhub?endpoint=news&category=${category==="forex"?"forex":"general"}`;
+              endpoint = `news&category=${category==="forex"?"forex":"general"}`;
             } else {
-              url = `/api/finnhub?endpoint=company-news&symbol=${category}&from=${weekAgo}&to=${today}`;
+              endpoint = `company-news&symbol=${category}&from=${weekAgo}&to=${today}`;
             }
-            const r = await fetch(url);
+            const r = await fetch(`/api/finnhub?endpoint=${endpoint}`);
             if (!r.ok) throw new Error(`${r.status}`);
             const data = await r.json();
             const feed = Array.isArray(data) ? data : [];
@@ -1004,9 +1008,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           }
           setLoading(false);
           return;
+        } catch(e) {
+          setError(`Could not load news: ${e.message}`);
         }
-
-        // No keys at all
         setLoading(false);
       };
 
@@ -1155,7 +1159,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         const fetched = {};
         await Promise.allSettled(items.map(async item => {
           try {
-            const q = await fetchQuote(item.symbol);
+            const q = await fetchQuote(item.symbol, finnhubKey);
             if (q.c > 0) fetched[item.symbol] = { price: q.c, change: q.dp || 0 };
           } catch {}
         }));
@@ -1265,7 +1269,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           const d = new Date(date);
           const from = Math.floor(d.getTime()/1000) - 86400;
           const to   = Math.floor(d.getTime()/1000) + 86400*2;
-          const url  = `https://finnhub.io/api/v1/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${to}&token=${finnhubKey}`;
+          const url  = `/api/finnhub?endpoint=candle&symbol=${encodeURIComponent(sym)}&resolution=D&from=${from}&to=${to}`;
           const res  = await fetch(url);
           const data = await res.json();
           if (data.s === "ok" && data.c?.length) {
@@ -1493,7 +1497,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         const fetched = {};
         await Promise.allSettled(portfolio.map(async h => {
           try {
-            const q = await fetchQuote(h.symbol);
+            const q = await fetchQuote(h.symbol, finnhubKey);
             if (q.c > 0) fetched[h.symbol] = {
               price:     q.c,
               change:    q.dp || 0,
@@ -1779,7 +1783,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       return (
         <div style={{ position:"fixed", inset:0, zIndex:100, display:"flex", alignItems:"flex-start", justifyContent:"flex-end" }} onClick={onClose}>
-          <div onClick={e=>e.stopPropagation()} style={{ marginTop:56, marginRight:14, width:320, background:darkMode?"#0a0f1e":"#f0f4fa", border:`1px solid ${C.border}`, borderRadius:12, padding:20, boxShadow:"0 20px 60px #00000088", animation:"slideIn 0.2s both", maxHeight:"calc(100vh - 80px)", overflowY:"auto" }}>
+          <div onClick={e=>e.stopPropagation()} style={{ marginTop:56, marginRight:14, width:320, background:darkMode?"#090e1c":"#ffffff", border:`1px solid ${C.border}`, borderRadius:12, padding:20, boxShadow:"0 20px 60px #00000088", animation:"slideIn 0.2s both", maxHeight:"calc(100vh - 80px)", overflowY:"auto" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
               <span style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.1em" }}>SETTINGS</span>
               <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer" }}>✕</button>
@@ -1919,6 +1923,210 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       {sym:"PLTR",  l:"PLTR"},
     ];
 
+    // ── COMPARE TAB ─────────────────────────────────────────────────────────────
+    function CompareTab({ C, finnhubKey, portfolio }) {
+      const [symA, setSymA] = useState(portfolio[0]?.symbol || "");
+      const [symB, setSymB] = useState(portfolio[1]?.symbol || "");
+      const [inputA, setInputA] = useState(portfolio[0]?.symbol || "");
+      const [inputB, setInputB] = useState(portfolio[1]?.symbol || "");
+      const [dataA, setDataA] = useState(null);
+      const [dataB, setDataB] = useState(null);
+      const [candleA, setCandleA] = useState(null);
+      const [candleB, setCandleB] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState("");
+      const [hover, setHover] = useState(null);
+      const svgRef = useRef(null);
+
+      async function loadComparison(sA, sB) {
+        if (!sA || !sB) return;
+        if (sA.toUpperCase() === sB.toUpperCase()) { setError("Please enter two different symbols."); return; }
+        setError(""); setLoading(true); setDataA(null); setDataB(null); setCandleA(null); setCandleB(null);
+        try {
+          const [qA, qB] = await Promise.all([fetchQuote(sA.toUpperCase()), fetchQuote(sB.toUpperCase())]);
+          if (!qA.c || !qB.c) throw new Error("Invalid symbol");
+          setDataA({ ...qA, symbol: sA.toUpperCase() });
+          setDataB({ ...qB, symbol: sB.toUpperCase() });
+
+          // Fetch 30-day candles
+          const now = Math.floor(Date.now()/1000);
+          const from = now - 60*60*24*30;
+          const [cA, cB] = await Promise.all([
+            fetch(`/api/finnhub?endpoint=candle&symbol=${encodeURIComponent(sA.toUpperCase())}&resolution=D&from=${from}&to=${now}`).then(r=>r.json()),
+            fetch(`/api/finnhub?endpoint=candle&symbol=${encodeURIComponent(sB.toUpperCase())}&resolution=D&from=${from}&to=${now}`).then(r=>r.json()),
+          ]);
+          if (cA.s === "ok") setCandleA(cA);
+          if (cB.s === "ok") setCandleB(cB);
+        } catch(e) {
+          setError("Could not load one or both symbols. Check your Finnhub key.");
+        }
+        setLoading(false);
+      }
+
+      useEffect(() => { if (symA && symB) loadComparison(symA, symB); }, []);
+
+      function handleCompare() {
+        const a = inputA.trim().toUpperCase();
+        const b = inputB.trim().toUpperCase();
+        setSymA(a); setSymB(b);
+        loadComparison(a, b);
+      }
+
+      // Normalize candles to % change from first close
+      function normalize(candle) {
+        if (!candle || !candle.c || !candle.c.length) return [];
+        const base = candle.c[0];
+        return candle.t.map((t, i) => ({ t, pct: ((candle.c[i] - base) / base) * 100 }));
+      }
+
+      const normA = normalize(candleA);
+      const normB = normalize(candleB);
+
+      // Build SVG chart
+      const W = 700, H = 180, PAD = { top:16, right:16, bottom:24, left:44 };
+      const allPcts = [...normA.map(p=>p.pct), ...normB.map(p=>p.pct)];
+      const minPct = allPcts.length ? Math.min(...allPcts) : -5;
+      const maxPct = allPcts.length ? Math.max(...allPcts) : 5;
+      const range = Math.max(maxPct - minPct, 2);
+      const xScale = (i, len) => PAD.left + (i / (len - 1)) * (W - PAD.left - PAD.right);
+      const yScale = v => PAD.top + (1 - (v - minPct) / range) * (H - PAD.top - PAD.bottom);
+
+      function toPath(pts) {
+        if (!pts.length) return "";
+        return pts.map((p, i) => `${i===0?"M":"L"}${xScale(i, pts.length).toFixed(1)},${yScale(p.pct).toFixed(1)}`).join(" ");
+      }
+
+      function StatRow({ label, valA, valB, format, higherIsBetter }) {
+        const a = parseFloat(valA), b = parseFloat(valB);
+        const aWins = higherIsBetter !== undefined ? (higherIsBetter ? a > b : a < b) : null;
+        return (
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, padding:"10px 0", borderBottom:`1px solid ${C.border}` }}>
+            <div style={{ fontSize:11, color:C.textMuted, display:"flex", alignItems:"center" }}>{label}</div>
+            <div style={{ fontSize:13, fontWeight:600, color: aWins===true ? C.green : aWins===false ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valA) : valA ?? "—"}</div>
+            <div style={{ fontSize:13, fontWeight:600, color: aWins===false ? C.green : aWins===true ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valB) : valB ?? "—"}</div>
+          </div>
+        );
+      }
+
+      const fmt$ = v => v != null ? `$${parseFloat(v).toFixed(2)}` : "—";
+      const fmtPct = v => v != null ? `${parseFloat(v).toFixed(2)}%` : "—";
+
+      return (
+        <div>
+          <div style={{ marginBottom:24 }}>
+            <div style={{ fontSize:20, fontWeight:700, color:C.text, marginBottom:4 }}>Compare Stocks</div>
+            <div style={{ fontSize:12, color:C.textMuted }}>Side-by-side performance & stats for any two symbols</div>
+          </div>
+
+          {/* Input row */}
+          <div style={{ display:"flex", gap:12, alignItems:"center", marginBottom:28 }}>
+            <input value={inputA} onChange={e=>setInputA(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleCompare()} placeholder="Symbol A (e.g. AAPL)" style={{ flex:1, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+            <div style={{ fontSize:16, color:C.textMuted, fontWeight:700 }}>VS</div>
+            <input value={inputB} onChange={e=>setInputB(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleCompare()} placeholder="Symbol B (e.g. MSFT)" style={{ flex:1, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+            <button onClick={handleCompare} disabled={loading} style={{ padding:"10px 20px", background:`linear-gradient(135deg,${C.cyan},${C.purple})`, border:"none", borderRadius:8, color:"#fff", fontWeight:700, fontSize:13, cursor:loading?"not-allowed":"pointer", opacity:loading?0.6:1 }}>
+              {loading ? "Loading..." : "Compare"}
+            </button>
+          </div>
+
+          {error && <div style={{ color:C.red, fontSize:12, marginBottom:16 }}>{error}</div>}
+
+          {dataA && dataB && (
+            <>
+              {/* Header cards */}
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
+                {[{d:dataA,color:C.cyan},{d:dataB,color:C.purple}].map(({d,color})=>(
+                  <div key={d.symbol} style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:20, borderTop:`3px solid ${color}` }}>
+                    <div style={{ fontSize:22, fontWeight:800, color, fontFamily:"'Space Mono',monospace" }}>{d.symbol}</div>
+                    <div style={{ fontSize:28, fontWeight:700, color:C.text, marginTop:4, fontFamily:"'DM Mono',monospace" }}>${d.c?.toFixed(2)}</div>
+                    <div style={{ fontSize:13, color: d.dp >= 0 ? C.green : C.red, marginTop:4, fontWeight:600 }}>
+                      {d.dp >= 0 ? "▲" : "▼"} {Math.abs(d.dp)?.toFixed(2)}% today
+                    </div>
+                    <div style={{ display:"flex", gap:16, marginTop:12 }}>
+                      <div><div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.08em" }}>HIGH</div><div style={{ fontSize:12, color:C.text, fontFamily:"'DM Mono',monospace" }}>${d.h?.toFixed(2)}</div></div>
+                      <div><div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.08em" }}>LOW</div><div style={{ fontSize:12, color:C.text, fontFamily:"'DM Mono',monospace" }}>${d.l?.toFixed(2)}</div></div>
+                      <div><div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.08em" }}>OPEN</div><div style={{ fontSize:12, color:C.text, fontFamily:"'DM Mono',monospace" }}>${d.o?.toFixed(2)}</div></div>
+                      <div><div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.08em" }}>PREV</div><div style={{ fontSize:12, color:C.text, fontFamily:"'DM Mono',monospace" }}>${d.pc?.toFixed(2)}</div></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 30-day chart overlay */}
+              {(normA.length > 0 || normB.length > 0) && (
+                <div style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:20, marginBottom:24 }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:C.text }}>30-Day Performance (% change)</div>
+                    <div style={{ display:"flex", gap:16 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6 }}><div style={{ width:24, height:2, background:C.cyan, borderRadius:1 }}/><span style={{ fontSize:11, color:C.textMuted, fontFamily:"'DM Mono',monospace" }}>{dataA.symbol}</span></div>
+                      <div style={{ display:"flex", alignItems:"center", gap:6 }}><div style={{ width:24, height:2, background:C.purple, borderRadius:1 }}/><span style={{ fontSize:11, color:C.textMuted, fontFamily:"'DM Mono',monospace" }}>{dataB.symbol}</span></div>
+                    </div>
+                  </div>
+                  <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:H, overflow:"visible" }}
+                    onMouseMove={e => {
+                      const rect = svgRef.current?.getBoundingClientRect();
+                      if (!rect) return;
+                      const x = (e.clientX - rect.left) / rect.width * W;
+                      const i = Math.round((x - PAD.left) / (W - PAD.left - PAD.right) * (normA.length - 1));
+                      if (i >= 0 && i < normA.length) setHover(i);
+                    }}
+                    onMouseLeave={() => setHover(null)}>
+                    {/* Zero line */}
+                    <line x1={PAD.left} y1={yScale(0)} x2={W-PAD.right} y2={yScale(0)} stroke={C.border} strokeDasharray="3,3" strokeWidth="1"/>
+                    {/* Y axis labels */}
+                    {[minPct, 0, maxPct].map(v => (
+                      <text key={v} x={PAD.left-6} y={yScale(v)+4} textAnchor="end" fontSize="9" fill={C.textMuted}>{v.toFixed(1)}%</text>
+                    ))}
+                    {/* Paths */}
+                    {normA.length > 1 && <path d={toPath(normA)} fill="none" stroke={C.cyan} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>}
+                    {normB.length > 1 && <path d={toPath(normB)} fill="none" stroke={C.purple} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>}
+                    {/* Hover */}
+                    {hover !== null && normA[hover] && (
+                      <>
+                        <line x1={xScale(hover, normA.length)} y1={PAD.top} x2={xScale(hover, normA.length)} y2={H-PAD.bottom} stroke={C.border} strokeWidth="1"/>
+                        <circle cx={xScale(hover, normA.length)} cy={yScale(normA[hover].pct)} r="4" fill={C.cyan} stroke={C.bgCard} strokeWidth="2"/>
+                        {normB[hover] && <circle cx={xScale(hover, normB.length)} cy={yScale(normB[hover].pct)} r="4" fill={C.purple} stroke={C.bgCard} strokeWidth="2"/>}
+                        <rect x={xScale(hover, normA.length)+8} y={PAD.top} width={110} height={normB[hover]?44:26} rx="4" fill={C.bgCard} stroke={C.border}/>
+                        <text x={xScale(hover, normA.length)+14} y={PAD.top+14} fontSize="10" fill={C.cyan}>{dataA.symbol}: {normA[hover].pct.toFixed(2)}%</text>
+                        {normB[hover] && <text x={xScale(hover, normB.length)+14} y={PAD.top+30} fontSize="10" fill={C.purple}>{dataB.symbol}: {normB[hover].pct.toFixed(2)}%</text>}
+                      </>
+                    )}
+                  </svg>
+                </div>
+              )}
+
+              {/* Stats table */}
+              <div style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:20 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:12 }}>Today's Stats</div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:8 }}>
+                  <div style={{ fontSize:10, color:C.textMuted, letterSpacing:"0.08em" }}>METRIC</div>
+                  <div style={{ fontSize:10, color:C.cyan, letterSpacing:"0.08em", textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{dataA.symbol}</div>
+                  <div style={{ fontSize:10, color:C.purple, letterSpacing:"0.08em", textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{dataB.symbol}</div>
+                </div>
+                <StatRow label="Current Price" valA={dataA.c} valB={dataB.c} format={fmt$} />
+                <StatRow label="Today's Change" valA={dataA.d} valB={dataB.d} format={v => `${v>=0?"+":""}$${parseFloat(v).toFixed(2)}`} higherIsBetter={true} />
+                <StatRow label="Today's Change %" valA={dataA.dp} valB={dataB.dp} format={fmtPct} higherIsBetter={true} />
+                <StatRow label="Day High" valA={dataA.h} valB={dataB.h} format={fmt$} />
+                <StatRow label="Day Low" valA={dataA.l} valB={dataB.l} format={fmt$} />
+                <StatRow label="Previous Close" valA={dataA.pc} valB={dataB.pc} format={fmt$} />
+                {normA.length > 0 && normB.length > 0 && (
+                  <StatRow label="30-Day Return" valA={normA[normA.length-1]?.pct} valB={normB[normB.length-1]?.pct} format={fmtPct} higherIsBetter={true} />
+                )}
+                <div style={{ fontSize:10, color:C.textMuted, marginTop:12 }}>🟢 Green = better value for that metric</div>
+              </div>
+            </>
+          )}
+
+          {!dataA && !dataB && !loading && (
+            <div style={{ textAlign:"center", padding:"60px 0", color:C.textMuted }}>
+              <div style={{ fontSize:32, marginBottom:12 }}>⚖️</div>
+              <div style={{ fontSize:14, fontWeight:600, color:C.text, marginBottom:6 }}>Compare any two stocks</div>
+              <div style={{ fontSize:12 }}>Enter two ticker symbols above and hit Compare</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
         function Stocker() {
       const [tab, setTab]                     = useState("portfolio");
       const [time, setTime]                   = useState(new Date());
@@ -1943,7 +2151,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           const saved = localStorage.getItem("stocker_portfolio");
           if (saved) return JSON.parse(saved);
         } catch {}
-        return BASE_PORTFOLIO.map(h => ({ ...h, price:h.avg, change:0, live:false }));
+        return [];
       });
 
       // Persist portfolio on every change
@@ -1985,7 +2193,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         try {
           setPortfolio(prev => {
             const symbols = prev.map(h => h.symbol);
-            Promise.allSettled(symbols.map(s => fetchQuote(s))).then(quotes => {
+            Promise.allSettled(symbols.map(s => fetchQuote(s, finnhubKey))).then(quotes => {
               setPortfolio(current => current.map((h, i) => {
                 const result = quotes[i];
                 if (result && result.status === "fulfilled" && result.value.c > 0) {
@@ -2020,7 +2228,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           const extraIdx = Math.floor(Math.random() * picks.length);
           const extra = rest[Math.floor(Math.random() * rest.length)];
           picks.splice(extraIdx, 0, extra);
-          const results = await Promise.allSettled(picks.map(p => fetchQuote(p.sym)));
+          const results = await Promise.allSettled(picks.map(p => fetchQuote(p.sym, finnhubKey)));
           const items = picks.map((p, i) => {
             const r = results[i];
             if (r.status !== "fulfilled" || !r.value || !r.value.c) return null;
@@ -2052,6 +2260,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         { id:"news",      label:"News",       icon:"M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z", badge: newsCount||null },
         { id:"search",    label:"Search",     icon:"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
         { id:"alerts",    label:"Alerts",     icon:"M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", badge: alertCount||null },
+        { id:"compare",   label:"Compare",    icon:"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
       ];
 
       return (
@@ -2069,10 +2278,10 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           )}
 
           {/* ── TOP NAVBAR ── */}
-          <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, height:60, borderBottom:`1px solid ${C.border}`, background:darkMode ? "rgba(5,8,16,0.95)" : "rgba(180,192,212,0.97)", backdropFilter:"blur(20px)", display:"flex", alignItems:"stretch" }}>
+          <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, height:60, borderBottom:`1px solid ${C.border}`, background:darkMode ? "rgba(4,6,15,0.96)" : "rgba(255,255,255,0.97)", backdropFilter:"blur(20px)", display:"flex", alignItems:"stretch" }}>
 
             {/* Logo zone — hardcoded bg so ticker can NEVER bleed over it */}
-            <div style={{ width:220, flexShrink:0, display:"flex", alignItems:"center", paddingLeft:24, position:"relative", zIndex:999, backgroundColor:darkMode?"#050810":"#a4b4cc" }}>
+            <div style={{ width:220, flexShrink:0, display:"flex", alignItems:"center", paddingLeft:24, position:"relative", zIndex:999, backgroundColor:darkMode?"#04060f":"#ffffff" }}>
               <div style={{ display:"flex", alignItems:"baseline", gap:4, fontFamily:"'DM Mono',monospace", fontWeight:700, letterSpacing:"0.16em" }}>
                 <span style={{ fontSize:20, color:C.cyan }}>STOCKR</span>
                 <span style={{ fontSize:16, color:C.purple }}>AI</span>
@@ -2101,7 +2310,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           </nav>
 
           {/* ── TICKER BAR — below navbar, full width, isolated ── */}
-          <div style={{ position:"fixed", top:60, left:0, right:0, zIndex:99, height:36, borderBottom:`1px solid ${C.border}`, backgroundColor:darkMode?"#050810":"#a4b4cc", overflow:"hidden", display:"flex", alignItems:"center" }}>
+          <div style={{ position:"fixed", top:60, left:0, right:0, zIndex:99, height:36, borderBottom:`1px solid ${C.border}`, backgroundColor:darkMode?"#04060f":"#ffffff", overflow:"hidden", display:"flex", alignItems:"center" }}>
             {(() => {
               const placeholders = !finnhubKey ? TICKER_POOL.slice(0,12).map(p => ({ ...p, v:"—", c:"—" })) : [];
               const display = tickerItems.length ? tickerItems : placeholders;
@@ -2123,7 +2332,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           <div style={{ display:"flex", paddingTop:96, minHeight:"100vh", position:"relative", zIndex:1 }}>
 
             {/* ── LEFT SIDEBAR ── */}
-            <aside style={{ width:220, flexShrink:0, position:"fixed", top:96, bottom:0, left:0, borderRight:`1px solid ${C.border}`, background:darkMode ? "rgba(5,8,16,0.97)" : "rgba(175,187,208,0.98)", backdropFilter:"blur(10px)", display:"flex", flexDirection:"column", padding:"24px 12px", overflowY:"auto" }}>
+            <aside style={{ width:220, flexShrink:0, position:"fixed", top:96, bottom:0, left:0, borderRight:`1px solid ${C.border}`, background:darkMode ? "rgba(4,6,15,0.98)" : "rgba(255,255,255,0.98)", backdropFilter:"blur(10px)", display:"flex", flexDirection:"column", padding:"24px 12px", overflowY:"auto" }}>
 
               {/* Portfolio summary card */}
               <div style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 16px", marginBottom:24, position:"relative", overflow:"hidden" }}>
@@ -2170,6 +2379,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 {tab==="news"      && <NewsTab C={C} newsKey={newsKey} finnhubKey={finnhubKey} portfolio={portfolio} onArticleCount={setNewsCount}/>}
                 {tab==="search"    && <SearchTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} setPortfolio={setPortfolio}/>}
                 {tab==="alerts"    && <AlertsTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} onAlertCount={setAlertCount}/>}
+                {tab==="compare"   && <CompareTab C={C} finnhubKey={finnhubKey} portfolio={portfolio}/>}
               </div>
             </main>
           </div>
