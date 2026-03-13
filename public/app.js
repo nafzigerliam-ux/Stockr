@@ -793,7 +793,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       const [apiError, setApiError] = useState("");
       const endRef = useRef(null);
       const remaining = AI_LIMIT - aiUsed;
-      const hasKey = !!anthropicKey;
+      const hasKey = true;
 
       useEffect(() => { endRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
@@ -812,7 +812,6 @@ const { useState, useEffect, useRef, useCallback } = React;
         setLoading(true);
         try {
           const aiText = await callClaude({
-            anthropicKey,
             system: `You are Stockr AI's Financial Companion — a sharp, intelligent assistant built into a personal portfolio intelligence dashboard. You have deep knowledge of financial markets, investing strategy, macroeconomics, and portfolio management.
 
 ## Personality
@@ -955,59 +954,51 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
         // ── Alpha Vantage (preferred, has sentiment) ──────────────────────────
         try {
-          try {
-            const r = await fetch(`/api/news?category=${encodeURIComponent(category)}`);
-            if (!r.ok) throw new Error(`${r.status}`);
-            const data = await r.json();
-            if (data.Information || data.Note) throw new Error("API limit reached");
-            const feed = data.feed || [];
-            const items = feed.slice(0, 8).map((a, i) => ({
-              id: i, headline: a.title||"", source: a.source||"", url: a.url||"#",
-              image: a.banner_image||"",
-              time: a.time_published ? timeAgo(new Date(a.time_published.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, "$1-$2-$3T$4:$5:$6")).getTime()) : "",
-              ticker: category==="general"?"MKT":category==="forex"?"FX":category,
-              sentiment: a.overall_sentiment_label||"",
-            }));
-            setArticles(items);
-            setSource("alphavantage");
-            if (onArticleCount) onArticleCount(items.length);
-            setLoading(false);
-            return;
-          } catch(e) {
-            setError(`Alpha Vantage: ${e.message} — falling back to Finnhub`);
-          }
+          const r = await fetch(`/api/news?category=${encodeURIComponent(category)}`);
+          if (!r.ok) throw new Error(`${r.status}`);
+          const data = await r.json();
+          if (data.Information || data.Note) throw new Error("API limit reached");
+          const feed = data.feed || [];
+          const items = feed.slice(0, 8).map((a, i) => ({
+            id: i, headline: a.title||"", source: a.source||"", url: a.url||"#",
+            image: a.banner_image||"",
+            time: a.time_published ? timeAgo(new Date(a.time_published.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, "$1-$2-$3T$4:$5:$6")).getTime()) : "",
+            ticker: category==="general"?"MKT":category==="forex"?"FX":category,
+            sentiment: a.overall_sentiment_label||"",
+          }));
+          setArticles(items);
+          setSource("alphavantage");
+          if (onArticleCount) onArticleCount(items.length);
+          setLoading(false);
+          return;
+        } catch(e) {
+          // fall back to Finnhub
         }
 
         // ── Finnhub fallback (free, no sentiment) ─────────────────────────────
         try {
-          try {
-            const today = new Date().toISOString().slice(0,10);
-            const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
-            let endpoint;
-            if (category === "general" || category === "forex") {
-              endpoint = `news&category=${category==="forex"?"forex":"general"}`;
-            } else {
-              endpoint = `company-news&symbol=${category}&from=${weekAgo}&to=${today}`;
-            }
-            const r = await fetch(`/api/finnhub?endpoint=${endpoint}`);
-            if (!r.ok) throw new Error(`${r.status}`);
-            const data = await r.json();
-            const feed = Array.isArray(data) ? data : [];
-            const items = feed.slice(0, 8).map((a, i) => ({
-              id: i, headline: a.headline||"", source: a.source||"", url: a.url||"#",
-              image: a.image||"",
-              time: a.datetime ? timeAgo(a.datetime * 1000) : "",
-              ticker: category==="general"?"MKT":category==="forex"?"FX":category,
-              sentiment: "",
-            }));
-            setArticles(items);
-            setSource("finnhub");
-            if (onArticleCount) onArticleCount(items.length);
-          } catch(e) {
-            setError(`Could not load news: ${e.message}`);
+          const today = new Date().toISOString().slice(0,10);
+          const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+          let endpoint;
+          if (category === "general" || category === "forex") {
+            endpoint = `news&category=${category==="forex"?"forex":"general"}`;
+          } else {
+            endpoint = `company-news&symbol=${category}&from=${weekAgo}&to=${today}`;
           }
-          setLoading(false);
-          return;
+          const r = await fetch(`/api/finnhub?endpoint=${endpoint}`);
+          if (!r.ok) throw new Error(`${r.status}`);
+          const data = await r.json();
+          const feed = Array.isArray(data) ? data : [];
+          const items = feed.slice(0, 8).map((a, i) => ({
+            id: i, headline: a.headline||"", source: a.source||"", url: a.url||"#",
+            image: a.image||"",
+            time: a.datetime ? timeAgo(a.datetime * 1000) : "",
+            ticker: category==="general"?"MKT":category==="forex"?"FX":category,
+            sentiment: "",
+          }));
+          setArticles(items);
+          setSource("finnhub");
+          if (onArticleCount) onArticleCount(items.length);
         } catch(e) {
           setError(`Could not load news: ${e.message}`);
         }
