@@ -1123,6 +1123,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const [added, setAdded]               = useState({});
       const debounceRef = useRef(null);
       const isSearchMode = query.trim().length > 0;
+      const [showDropdown, setShowDropdown] = useState(false);
 
       // Fetch quotes for a list and return { symbol: {price, change} }
       const fetchPrices = async (items) => {
@@ -1305,15 +1306,45 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       return (
         <div>
-          {/* Search bar */}
-          <div style={{ display:"flex", gap:10, background:C.bgCard, border:`1px solid ${C.borderBright}`, borderRadius:14, padding:"11px 16px", alignItems:"center", marginBottom:12, backdropFilter:"blur(10px)" }}>
-            <span style={{ fontSize:14, color:C.cyan }}>⌕</span>
-            <input value={query} onChange={e=>handleQueryChange(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&query.trim()&&doSearch(query.trim())}
-              placeholder="Search any stock or crypto — e.g. Apple, BTC, NVDA..."
-              style={{ flex:1, background:"none", border:"none", outline:"none", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11 }}/>
-            {loading && <Spinner color={C.cyan}/>}
-            {query && <button onClick={()=>{setQuery("");setApiError("");}} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", lineHeight:1 }}>✕</button>}
+          {/* Search bar with dropdown */}
+          <div style={{ position:"relative", marginBottom:12 }}>
+            <div style={{ display:"flex", gap:10, background:C.bgCard, border:`1px solid ${showDropdown&&query?C.cyan+"88":C.borderBright}`, borderRadius: showDropdown&&query&&displayList.length?"14px 14px 0 0":"14px", padding:"11px 16px", alignItems:"center", backdropFilter:"blur(10px)", transition:"border-radius 0.15s, border-color 0.2s" }}>
+              <span style={{ fontSize:14, color:C.cyan }}>⌕</span>
+              <input value={query} onChange={e=>{ handleQueryChange(e.target.value); setShowDropdown(true); }}
+                onKeyDown={e=>{ if(e.key==="Enter"&&query.trim()){ setShowDropdown(false); doSearch(query.trim()); } if(e.key==="Escape"){ setShowDropdown(false); } }}
+                onFocus={()=>query&&setShowDropdown(true)}
+                onBlur={()=>setTimeout(()=>setShowDropdown(false), 150)}
+                placeholder="Search any stock or crypto — e.g. Apple, BTC, NVDA..."
+                style={{ flex:1, background:"none", border:"none", outline:"none", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11 }}/>
+              {loading && <Spinner color={C.cyan}/>}
+              {query && <button onClick={()=>{setQuery("");setApiError("");setShowDropdown(false);}} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", lineHeight:1 }}>✕</button>}
+            </div>
+            {/* Dropdown autocomplete */}
+            {showDropdown && query && displayList.length > 0 && (
+              <div style={{ position:"absolute", top:"100%", left:0, right:0, zIndex:100, background:C.bgCard, border:`1px solid ${C.cyan+"88"}`, borderTop:"none", borderRadius:"0 0 14px 14px", overflow:"hidden", boxShadow:"0 12px 40px #00000088", maxHeight:280, overflowY:"auto" }}>
+                {displayList.slice(0,8).map((item, i) => (
+                  <div key={i}
+                    onMouseDown={()=>{ setQuery(item.displaySymbol||item.symbol); setShowDropdown(false); doSearch(item.symbol); }}
+                    style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 16px", cursor:"pointer", borderBottom:i<Math.min(displayList.length,8)-1?`1px solid ${C.border}`:"none", background:"transparent", transition:"background 0.15s" }}
+                    onMouseEnter={e=>e.currentTarget.style.background=C.bgCardHover}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      <div style={{ width:32, height:32, borderRadius:8, background:`linear-gradient(135deg,${C.cyan}22,${C.purple}22)`, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:10, color:C.cyan, fontFamily:"'Space Mono',monospace" }}>
+                        {(item.displaySymbol||item.symbol).slice(0,3)}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight:700, color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace" }}>{item.displaySymbol||item.symbol}</div>
+                        <div style={{ color:C.textMuted, fontSize:11 }}>{item.name}</div>
+                      </div>
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      {prices[item.symbol]?.c && <span style={{ fontFamily:"'DM Mono',monospace", fontSize:12, color:C.text }}>${prices[item.symbol].c.toFixed(2)}</span>}
+                      <span style={{ fontSize:10, background:`${C.cyan}20`, color:C.cyan, borderRadius:4, padding:"2px 7px" }}>{item.sector||"Stock"}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {!finnhubKey && (
