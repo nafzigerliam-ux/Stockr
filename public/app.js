@@ -2047,91 +2047,91 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
+        // ── Supabase client ──────────────────────────────────────────────────────
+    const _supabase = window.supabase.createClient("https://vkrwxdtzolvecpfwhoir.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcnd4ZHR6b2x2ZWNwZndob2lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjYzOTgsImV4cCI6MjA4OTAwMjM5OH0.9yxfmKvvLDaFfLpsX5LYz2oRnTWT08oMmdSXiG8zjY8");
+
         // ── Auth Screen ──────────────────────────────────────────────────────────
     function AuthScreen({ C, onAuth }) {
-      const [mode, setMode] = useState("signin"); // "signin" | "signup"
+      const [mode, setMode] = useState("signin");
       const [email, setEmail] = useState("");
       const [password, setPassword] = useState("");
       const [name, setName] = useState("");
       const [error, setError] = useState("");
       const [loading, setLoading] = useState(false);
+      const [verifyMsg, setVerifyMsg] = useState("");
 
-      const handleSubmit = () => {
-        setError("");
+      const handleSubmit = async () => {
+        setError(""); setVerifyMsg("");
         if (!email || !password) return setError("Please fill in all fields.");
         if (mode === "signup" && !name) return setError("Please enter your name.");
         if (password.length < 6) return setError("Password must be at least 6 characters.");
         setLoading(true);
-        setTimeout(() => {
-          try {
-            const users = JSON.parse(localStorage.getItem("stocker_users") || "{}");
-            if (mode === "signup") {
-              if (users[email]) return setError("Account already exists. Sign in instead."), setLoading(false);
-              users[email] = { name, password };
-              localStorage.setItem("stocker_users", JSON.stringify(users));
-              localStorage.setItem("stocker_session", JSON.stringify({ email, name }));
-              localStorage.removeItem("stocker_portfolio_" + email);
-              onAuth({ email, name, isNew: true });
-            } else {
-              const user = users[email];
-              if (!user || user.password !== password) return setError("Invalid email or password."), setLoading(false);
-              localStorage.setItem("stocker_session", JSON.stringify({ email, name: user.name }));
-              onAuth({ email, name: user.name, isNew: false });
-            }
-          } catch(e) { setError("Something went wrong."); setLoading(false); }
-        }, 600);
+        try {
+          if (mode === "signup") {
+            const { data, error: err } = await _supabase.auth.signUp({
+              email, password,
+              options: { data: { full_name: name } }
+            });
+            if (err) throw err;
+            setVerifyMsg("Check your email to confirm your account, then sign in!");
+            setMode("signin");
+          } else {
+            const { data, error: err } = await _supabase.auth.signInWithPassword({ email, password });
+            if (err) throw err;
+            const user = data.user;
+            const displayName = user.user_metadata?.full_name || email.split("@")[0];
+            onAuth({ email: user.email, name: displayName, id: user.id, isNew: false });
+          }
+        } catch(e) {
+          setError(e.message || "Something went wrong.");
+        }
+        setLoading(false);
       };
 
-      const inp = { background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, borderRadius: 8,
-        padding: "11px 14px", color: C.text, fontSize: 14, fontFamily: "'DM Sans',sans-serif",
-        outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 12 };
+      const inp = { background:"rgba(255,255,255,0.06)", border:`1px solid ${C.border}`, borderRadius:8,
+        padding:"11px 14px", color:C.text, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+        outline:"none", width:"100%", boxSizing:"border-box", marginBottom:12 };
 
       return (
         <div style={{ minHeight:"100vh", background:C.bg, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'DM Sans',sans-serif" }}>
-          <div style={{ width: 400, padding: "40px 36px", background: C.bgCard, borderRadius: 20, border: `1px solid ${C.border}`, boxShadow: C.cardShadow }}>
-            {/* Logo */}
-            <div style={{ textAlign:"center", marginBottom: 32 }}>
-              <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: 1, marginBottom: 4 }}>
-                <span style={{ color: C.cyan }}>STOCKR</span><span style={{ color: C.purple, fontSize: 18 }}> AI</span>
+          <div style={{ width:400, padding:"40px 36px", background:C.bgCard, borderRadius:20, border:`1px solid ${C.border}` }}>
+            <div style={{ textAlign:"center", marginBottom:32 }}>
+              <div style={{ fontSize:28, fontWeight:800, letterSpacing:1, marginBottom:4 }}>
+                <span style={{ color:C.cyan }}>STOCKR</span><span style={{ color:C.purple, fontSize:18 }}> AI</span>
               </div>
-              <div style={{ color: C.textMuted, fontSize: 13 }}>Portfolio Intelligence Platform</div>
+              <div style={{ color:C.textMuted, fontSize:13 }}>Portfolio Intelligence Platform</div>
             </div>
 
-            {/* Tabs */}
             <div style={{ display:"flex", background:"rgba(255,255,255,0.04)", borderRadius:10, padding:3, marginBottom:24 }}>
               {["signin","signup"].map(m => (
-                <button key={m} onClick={()=>{setMode(m);setError("");}}
+                <button key={m} onClick={()=>{setMode(m);setError("");setVerifyMsg("");}}
                   style={{ flex:1, padding:"8px 0", borderRadius:8, border:"none", cursor:"pointer", fontSize:13, fontWeight:600, fontFamily:"'DM Sans',sans-serif",
-                    background: mode===m ? C.cyan : "none", color: mode===m ? "#000" : C.textMuted, transition:"all 0.2s" }}>
-                  {m === "signin" ? "Sign In" : "Sign Up"}
+                    background:mode===m?C.cyan:"none", color:mode===m?"#000":C.textMuted, transition:"all 0.2s" }}>
+                  {m==="signin"?"Sign In":"Sign Up"}
                 </button>
               ))}
             </div>
 
-            {/* Fields */}
-            {mode === "signup" && (
-              <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name"
-                style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
-            )}
-            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email"
-              style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
-            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password"
-              style={{...inp, marginBottom: error ? 8 : 20}} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+            {verifyMsg && <div style={{ background:`${C.cyan}15`, border:`1px solid ${C.cyan}40`, borderRadius:8, padding:"10px 14px", color:C.cyan, fontSize:12, marginBottom:14 }}>{verifyMsg}</div>}
 
-            {error && <div style={{ color: C.red, fontSize: 12, marginBottom: 14 }}>{error}</div>}
+            {mode==="signup" && <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />}
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" style={{...inp, marginBottom:error?8:20}} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+
+            {error && <div style={{ color:C.red, fontSize:12, marginBottom:14 }}>{error}</div>}
 
             <button onClick={handleSubmit} disabled={loading}
-              style={{ width:"100%", padding:"12px 0", borderRadius:10, border:"none", cursor: loading?"not-allowed":"pointer",
-                background: `linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:14, fontWeight:700,
-                fontFamily:"'DM Sans',sans-serif", opacity: loading ? 0.7 : 1, transition:"opacity 0.2s" }}>
-              {loading ? "..." : mode === "signin" ? "Sign In" : "Create Account"}
+              style={{ width:"100%", padding:"12px 0", borderRadius:10, border:"none", cursor:loading?"not-allowed":"pointer",
+                background:`linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:14, fontWeight:700,
+                fontFamily:"'DM Sans',sans-serif", opacity:loading?0.7:1, transition:"opacity 0.2s" }}>
+              {loading?"...":(mode==="signin"?"Sign In":"Create Account")}
             </button>
 
             <div style={{ textAlign:"center", marginTop:20, color:C.textMuted, fontSize:12 }}>
-              {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
-              <span onClick={()=>{setMode(mode==="signin"?"signup":"signin");setError("");}}
+              {mode==="signin"?"Don't have an account? ":"Already have an account? "}
+              <span onClick={()=>{setMode(mode==="signin"?"signup":"signin");setError("");setVerifyMsg("");}}
                 style={{ color:C.cyan, cursor:"pointer", fontWeight:600 }}>
-                {mode === "signin" ? "Sign Up" : "Sign In"}
+                {mode==="signin"?"Sign Up":"Sign In"}
               </span>
             </div>
           </div>
@@ -2147,9 +2147,28 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const [showSettings, setShowSettings]   = useState(false);
       const [isLoggedIn, setIsLoggedIn]       = useState(false);
       const [aiUsed, setAiUsed]               = useState(0);
-      const [currentUser, setCurrentUser]     = useState(() => {
-        try { return JSON.parse(localStorage.getItem("stocker_session") || "null"); } catch { return null; }
-      });
+      const [currentUser, setCurrentUser]     = useState(null);
+      const [authLoading, setAuthLoading]     = useState(true);
+
+      // Restore Supabase session on load
+      useEffect(() => {
+        _supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user) {
+            const u = session.user;
+            setCurrentUser({ email: u.email, name: u.user_metadata?.full_name || u.email.split("@")[0], id: u.id });
+          }
+          setAuthLoading(false);
+        });
+        const { data: { subscription } } = _supabase.auth.onAuthStateChange((_event, session) => {
+          if (session?.user) {
+            const u = session.user;
+            setCurrentUser({ email: u.email, name: u.user_metadata?.full_name || u.email.split("@")[0], id: u.id });
+          } else {
+            setCurrentUser(null);
+          }
+        });
+        return () => subscription.unsubscribe();
+      }, []);
 
       // API keys — entered via Settings, persisted to localStorage
       const [anthropicKey, setAnthropicKey]   = useState("server");
@@ -2160,19 +2179,21 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       useEffect(() => { try { localStorage.setItem("stocker_finnhub_key", finnhubKey); } catch {} }, [finnhubKey]);
       useEffect(() => { try { localStorage.setItem("stocker_news_key", newsKey); } catch {} }, [newsKey]);
 
-      // Portfolio with live prices — persisted to localStorage per user
-      const portfolioKey = currentUser ? "stocker_portfolio_" + currentUser.email : "stocker_portfolio_guest";
-      const [portfolio, setPortfolio] = useState(() => {
-        try {
-          const saved = localStorage.getItem(portfolioKey);
-          if (saved) return JSON.parse(saved);
-        } catch {}
-        return [];
-      });
+      // Portfolio — loaded from Supabase, persisted on change
+      const [portfolio, setPortfolio] = useState([]);
 
-      // Persist portfolio on every change
+      // Load portfolio from Supabase when user logs in
       useEffect(() => {
-        try { localStorage.setItem(portfolioKey, JSON.stringify(portfolio)); } catch {}
+        if (!currentUser?.id) return;
+        _supabase.from("portfolios").select("holdings").eq("user_id", currentUser.id).single()
+          .then(({ data }) => { if (data?.holdings) setPortfolio(data.holdings); });
+      }, [currentUser?.id]);
+
+      // Save portfolio to Supabase on every change
+      useEffect(() => {
+        if (!currentUser?.id) return;
+        _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+        try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
       }, [portfolio]);
 
       // Persist API keys
@@ -2280,15 +2301,18 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       ];
 
       // Auth gate
-      if (!currentUser) {
-        return <AuthScreen C={C} onAuth={(user) => {
-          setCurrentUser(user);
-          if (user.isNew) setPortfolio([]);
-        }} />;
+      if (authLoading) {
+        return <div style={{ minHeight:"100vh", background:C.bg, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ color:C.cyan, fontFamily:"'Space Mono',monospace", fontSize:13 }}>Loading...</div>
+        </div>;
       }
 
-      const handleSignOut = () => {
-        localStorage.removeItem("stocker_session");
+      if (!currentUser) {
+        return <AuthScreen C={C} onAuth={(user) => setCurrentUser(user)} />;
+      }
+
+      const handleSignOut = async () => {
+        await _supabase.auth.signOut();
         setCurrentUser(null);
         setPortfolio([]);
       };

@@ -16,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script crossOrigin="anonymous" src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script crossOrigin="anonymous" src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <style>{`* { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #050810; font-family: 'DM Sans', sans-serif; }
     ::-webkit-scrollbar { width: 3px; }
