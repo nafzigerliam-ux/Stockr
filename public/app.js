@@ -2128,9 +2128,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const [aiUsed, setAiUsed]               = useState(0);
 
       // API keys — entered via Settings, persisted to localStorage
-      const [anthropicKey, setAnthropicKey]   = useState("");
-      const [finnhubKey, setFinnhubKey]       = useState("");
-      const [newsKey, setNewsKey]             = useState("");
+      const [anthropicKey, setAnthropicKey]   = useState("server");
+      const [finnhubKey, setFinnhubKey]       = useState("server");
+      const [newsKey, setNewsKey]             = useState("server");
 
       useEffect(() => { try { localStorage.setItem("stocker_anthropic_key", anthropicKey); } catch {} }, [anthropicKey]);
       useEffect(() => { try { localStorage.setItem("stocker_finnhub_key", finnhubKey); } catch {} }, [finnhubKey]);
