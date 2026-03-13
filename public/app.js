@@ -952,40 +952,20 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const fetchNews = async (category) => {
         setLoading(true); setError(""); setArticles([]);
 
-        // ── Alpha Vantage (preferred, has sentiment) ──────────────────────────
-        try {
-          const r = await fetch(`/api/news?category=${encodeURIComponent(category)}`);
-          if (!r.ok) throw new Error(`${r.status}`);
-          const data = await r.json();
-          if (data.Information || data.Note) throw new Error("API limit reached");
-          const feed = data.feed || [];
-          const items = feed.slice(0, 8).map((a, i) => ({
-            id: i, headline: a.title||"", source: a.source||"", url: a.url||"#",
-            image: a.banner_image||"",
-            time: a.time_published ? timeAgo(new Date(a.time_published.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, "$1-$2-$3T$4:$5:$6")).getTime()) : "",
-            ticker: category==="general"?"MKT":category==="forex"?"FX":category,
-            sentiment: a.overall_sentiment_label||"",
-          }));
-          setArticles(items);
-          setSource("alphavantage");
-          if (onArticleCount) onArticleCount(items.length);
-          setLoading(false);
-          return;
-        } catch(e) {
-          // fall back to Finnhub
-        }
+        // ── Alpha Vantage skipped — using Finnhub ────────────────────────────
 
         // ── Finnhub fallback (free, no sentiment) ─────────────────────────────
         try {
           const today = new Date().toISOString().slice(0,10);
           const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
           let endpoint;
+          let newsUrl;
           if (category === "general" || category === "forex") {
-            endpoint = `news&category=${category==="forex"?"forex":"general"}`;
+            newsUrl = `/api/finnhub?endpoint=news&category=${category==="forex"?"forex":"general"}`;
           } else {
-            endpoint = `company-news&symbol=${category}&from=${weekAgo}&to=${today}`;
+            newsUrl = `/api/finnhub?endpoint=company-news&symbol=${category}&from=${weekAgo}&to=${today}`;
           }
-          const r = await fetch(`/api/finnhub?endpoint=${endpoint}`);
+          const r = await fetch(newsUrl);
           if (!r.ok) throw new Error(`${r.status}`);
           const data = await r.json();
           const feed = Array.isArray(data) ? data : [];
@@ -1780,74 +1760,23 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer" }}>✕</button>
             </div>
 
-            {/* Anthropic Key */}
-            <Section label="ANTHROPIC API KEY" C={C}>
-              <div style={{ fontSize:10, color:C.textMuted, marginBottom:8, lineHeight:1.6 }}>
-                Powers AI Advisor and Search.<br/>Get yours at <span style={{ color:C.cyan }}>console.anthropic.com</span>
-              </div>
-              {anthropicKey ? (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${C.green}44`, borderRadius:6, padding:"7px 10px" }}>
-                    <span style={{ fontSize:10, color:C.green }}>● Key saved</span>
-                    <span style={{ fontSize:10, color:C.textMuted, fontFamily:"'Space Mono',monospace" }}>···{anthropicKey.slice(-6)}</span>
+            {/* API Status — server-side keys, no user input needed */}
+            <Section label="DATA SOURCES" C={C}>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {[
+                  { label:"AI Advisor", desc:"Powered by Claude", color:C.purple },
+                  { label:"Live Prices", desc:"Powered by Finnhub", color:C.cyan },
+                  { label:"Live News", desc:"Powered by Alpha Vantage", color:C.green },
+                ].map(({ label, desc, color }) => (
+                  <div key={label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${color}33`, borderRadius:6, padding:"8px 12px" }}>
+                    <div>
+                      <div style={{ fontSize:10, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>{label}</div>
+                      <div style={{ fontSize:10, color:C.textMuted, marginTop:2 }}>{desc}</div>
+                    </div>
+                    <span style={{ fontSize:10, color:color }}>● Live</span>
                   </div>
-                  <button onClick={()=>{setAnthropicKey("");setAKeyInput("");}} style={{ background:C.red+"11", border:`1px solid ${C.red}44`, borderRadius:6, padding:"6px", color:C.red, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer" }}>REMOVE</button>
-                </div>
-              ) : (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <input value={aKeyInput} onChange={e=>setAKeyInput(e.target.value)} placeholder="sk-ant-api03-..." type="password" style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:6, padding:"7px 10px", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11, outline:"none", width:"100%" }}/>
-                  <button onClick={saveAKey} disabled={!aKeyInput.trim()} style={{ background:aKeyInput.trim()?`linear-gradient(135deg,${C.cyan},${C.purple})`:C.border, border:"none", borderRadius:6, padding:"7px", color:aKeyInput.trim()?"#000":C.textDim, fontWeight:700, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:aKeyInput.trim()?"pointer":"not-allowed" }}>
-                    {aSaved?"✓ SAVED":"SAVE KEY"}
-                  </button>
-                </div>
-              )}
-            </Section>
-
-            {/* Finnhub Key */}
-            <Section label="FINNHUB API KEY (LIVE PRICES)" C={C}>
-              <div style={{ fontSize:10, color:C.textMuted, marginBottom:8, lineHeight:1.6 }}>
-                Powers live stock prices. Free at <span style={{ color:C.cyan }}>finnhub.io</span>
+                ))}
               </div>
-              {finnhubKey ? (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${C.green}44`, borderRadius:6, padding:"7px 10px" }}>
-                    <span style={{ fontSize:10, color:C.green }}>● Key saved</span>
-                    <span style={{ fontSize:10, color:C.textMuted, fontFamily:"'Space Mono',monospace" }}>···{finnhubKey.slice(-6)}</span>
-                  </div>
-                  <button onClick={()=>{setFinnhubKey("");setFKeyInput("");}} style={{ background:C.red+"11", border:`1px solid ${C.red}44`, borderRadius:6, padding:"6px", color:C.red, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer" }}>REMOVE</button>
-                </div>
-              ) : (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <input value={fKeyInput} onChange={e=>setFKeyInput(e.target.value)} placeholder="d6xxxxxxxxxxxxx" type="password" style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:6, padding:"7px 10px", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11, outline:"none", width:"100%" }}/>
-                  <button onClick={saveFKey} disabled={!fKeyInput.trim()} style={{ background:fKeyInput.trim()?`linear-gradient(135deg,${C.green}88,${C.cyan}88)`:C.border, border:"none", borderRadius:6, padding:"7px", color:fKeyInput.trim()?"#000":C.textDim, fontWeight:700, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:fKeyInput.trim()?"pointer":"not-allowed" }}>
-                    {fSaved?"✓ SAVED":"SAVE KEY"}
-                  </button>
-                </div>
-              )}
-            </Section>
-
-
-            {/* NewsAPI Key */}
-            <Section label="ALPHA VANTAGE KEY (LIVE NEWS)" C={C}>
-              <div style={{ fontSize:10, color:C.textMuted, marginBottom:8, lineHeight:1.6 }}>
-                Powers live news & sentiment. Free at <span style={{ color:C.cyan }}>alphavantage.co</span>
-              </div>
-              {newsKey ? (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${C.green}44`, borderRadius:6, padding:"7px 10px" }}>
-                    <span style={{ fontSize:10, color:C.green }}>● Key saved</span>
-                    <span style={{ fontSize:10, color:C.textMuted, fontFamily:"'Space Mono',monospace" }}>···{newsKey.slice(-6)}</span>
-                  </div>
-                  <button onClick={()=>{setNewsKey("");setNKeyInput("");}} style={{ background:C.red+"11", border:`1px solid ${C.red}44`, borderRadius:6, padding:"6px", color:C.red, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer" }}>REMOVE</button>
-                </div>
-              ) : (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <input value={nKeyInput} onChange={e=>setNKeyInput(e.target.value)} placeholder="your newsapi key..." type="password" style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:6, padding:"7px 10px", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11, outline:"none", width:"100%" }}/>
-                  <button onClick={saveNKey} disabled={!nKeyInput.trim()} style={{ background:nKeyInput.trim()?`linear-gradient(135deg,${C.purple}88,${C.cyan}88)`:C.border, border:"none", borderRadius:6, padding:"7px", color:nKeyInput.trim()?"#000":C.textDim, fontWeight:700, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:nKeyInput.trim()?"pointer":"not-allowed" }}>
-                    {nSaved?"✓ SAVED":"SAVE KEY"}
-                  </button>
-                </div>
-              )}
             </Section>
 
             {/* Account */}            <Section label="ACCOUNT" C={C}>
