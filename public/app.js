@@ -2047,7 +2047,99 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-        function Stocker() {
+        // ── Auth Screen ──────────────────────────────────────────────────────────
+    function AuthScreen({ C, onAuth }) {
+      const [mode, setMode] = useState("signin"); // "signin" | "signup"
+      const [email, setEmail] = useState("");
+      const [password, setPassword] = useState("");
+      const [name, setName] = useState("");
+      const [error, setError] = useState("");
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = () => {
+        setError("");
+        if (!email || !password) return setError("Please fill in all fields.");
+        if (mode === "signup" && !name) return setError("Please enter your name.");
+        if (password.length < 6) return setError("Password must be at least 6 characters.");
+        setLoading(true);
+        setTimeout(() => {
+          try {
+            const users = JSON.parse(localStorage.getItem("stocker_users") || "{}");
+            if (mode === "signup") {
+              if (users[email]) return setError("Account already exists. Sign in instead."), setLoading(false);
+              users[email] = { name, password };
+              localStorage.setItem("stocker_users", JSON.stringify(users));
+              localStorage.setItem("stocker_session", JSON.stringify({ email, name }));
+              localStorage.removeItem("stocker_portfolio_" + email);
+              onAuth({ email, name, isNew: true });
+            } else {
+              const user = users[email];
+              if (!user || user.password !== password) return setError("Invalid email or password."), setLoading(false);
+              localStorage.setItem("stocker_session", JSON.stringify({ email, name: user.name }));
+              onAuth({ email, name: user.name, isNew: false });
+            }
+          } catch(e) { setError("Something went wrong."); setLoading(false); }
+        }, 600);
+      };
+
+      const inp = { background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, borderRadius: 8,
+        padding: "11px 14px", color: C.text, fontSize: 14, fontFamily: "'DM Sans',sans-serif",
+        outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 12 };
+
+      return (
+        <div style={{ minHeight:"100vh", background:C.bg, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'DM Sans',sans-serif" }}>
+          <div style={{ width: 400, padding: "40px 36px", background: C.bgCard, borderRadius: 20, border: `1px solid ${C.border}`, boxShadow: C.cardShadow }}>
+            {/* Logo */}
+            <div style={{ textAlign:"center", marginBottom: 32 }}>
+              <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: 1, marginBottom: 4 }}>
+                <span style={{ color: C.cyan }}>STOCKR</span><span style={{ color: C.purple, fontSize: 18 }}> AI</span>
+              </div>
+              <div style={{ color: C.textMuted, fontSize: 13 }}>Portfolio Intelligence Platform</div>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display:"flex", background:"rgba(255,255,255,0.04)", borderRadius:10, padding:3, marginBottom:24 }}>
+              {["signin","signup"].map(m => (
+                <button key={m} onClick={()=>{setMode(m);setError("");}}
+                  style={{ flex:1, padding:"8px 0", borderRadius:8, border:"none", cursor:"pointer", fontSize:13, fontWeight:600, fontFamily:"'DM Sans',sans-serif",
+                    background: mode===m ? C.cyan : "none", color: mode===m ? "#000" : C.textMuted, transition:"all 0.2s" }}>
+                  {m === "signin" ? "Sign In" : "Sign Up"}
+                </button>
+              ))}
+            </div>
+
+            {/* Fields */}
+            {mode === "signup" && (
+              <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name"
+                style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+            )}
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email"
+              style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password"
+              style={{...inp, marginBottom: error ? 8 : 20}} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+
+            {error && <div style={{ color: C.red, fontSize: 12, marginBottom: 14 }}>{error}</div>}
+
+            <button onClick={handleSubmit} disabled={loading}
+              style={{ width:"100%", padding:"12px 0", borderRadius:10, border:"none", cursor: loading?"not-allowed":"pointer",
+                background: `linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:14, fontWeight:700,
+                fontFamily:"'DM Sans',sans-serif", opacity: loading ? 0.7 : 1, transition:"opacity 0.2s" }}>
+              {loading ? "..." : mode === "signin" ? "Sign In" : "Create Account"}
+            </button>
+
+            <div style={{ textAlign:"center", marginTop:20, color:C.textMuted, fontSize:12 }}>
+              {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
+              <span onClick={()=>{setMode(mode==="signin"?"signup":"signin");setError("");}}
+                style={{ color:C.cyan, cursor:"pointer", fontWeight:600 }}>
+                {mode === "signin" ? "Sign Up" : "Sign In"}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Stocker() {
       const [tab, setTab]                     = useState("portfolio");
       const [time, setTime]                   = useState(new Date());
       const [darkMode, setDarkMode]           = useState(true);
@@ -2055,6 +2147,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const [showSettings, setShowSettings]   = useState(false);
       const [isLoggedIn, setIsLoggedIn]       = useState(false);
       const [aiUsed, setAiUsed]               = useState(0);
+      const [currentUser, setCurrentUser]     = useState(() => {
+        try { return JSON.parse(localStorage.getItem("stocker_session") || "null"); } catch { return null; }
+      });
 
       // API keys — entered via Settings, persisted to localStorage
       const [anthropicKey, setAnthropicKey]   = useState("server");
@@ -2065,10 +2160,11 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       useEffect(() => { try { localStorage.setItem("stocker_finnhub_key", finnhubKey); } catch {} }, [finnhubKey]);
       useEffect(() => { try { localStorage.setItem("stocker_news_key", newsKey); } catch {} }, [newsKey]);
 
-      // Portfolio with live prices — persisted to localStorage
+      // Portfolio with live prices — persisted to localStorage per user
+      const portfolioKey = currentUser ? "stocker_portfolio_" + currentUser.email : "stocker_portfolio_guest";
       const [portfolio, setPortfolio] = useState(() => {
         try {
-          const saved = localStorage.getItem("stocker_portfolio");
+          const saved = localStorage.getItem(portfolioKey);
           if (saved) return JSON.parse(saved);
         } catch {}
         return [];
@@ -2076,7 +2172,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       // Persist portfolio on every change
       useEffect(() => {
-        try { localStorage.setItem("stocker_portfolio", JSON.stringify(portfolio)); } catch {}
+        try { localStorage.setItem(portfolioKey, JSON.stringify(portfolio)); } catch {}
       }, [portfolio]);
 
       // Persist API keys
@@ -2183,6 +2279,20 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         { id:"compare",   label:"Compare",    icon:"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
       ];
 
+      // Auth gate
+      if (!currentUser) {
+        return <AuthScreen C={C} onAuth={(user) => {
+          setCurrentUser(user);
+          if (user.isNew) setPortfolio([]);
+        }} />;
+      }
+
+      const handleSignOut = () => {
+        localStorage.removeItem("stocker_session");
+        setCurrentUser(null);
+        setPortfolio([]);
+      };
+
       return (
         <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"'DM Sans',sans-serif", color:C.text, transition:"background 0.4s, color 0.4s" }}>
 
@@ -2221,6 +2331,13 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               <button onClick={()=>setDarkMode(d=>!d)} title={darkMode?"Light mode":"Dark mode"} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.textMuted, transition:"all 0.2s", fontSize:14 }}>
                 {darkMode ? "☀" : "🌙"}
               </button>
+              <div style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 10px", background:"rgba(255,255,255,0.04)", borderRadius:8, border:`1px solid ${C.border}` }}>
+                <div style={{ width:22, height:22, borderRadius:"50%", background:`linear-gradient(135deg,${C.purple},${C.cyan})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700, color:"#fff" }}>
+                  {currentUser.name ? currentUser.name[0].toUpperCase() : "U"}
+                </div>
+                <span style={{ fontSize:12, color:C.textMuted, maxWidth:80, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{currentUser.name || currentUser.email}</span>
+                <button onClick={handleSignOut} title="Sign out" style={{ background:"none", border:"none", cursor:"pointer", color:C.textMuted, fontSize:11, padding:"2px 4px", borderRadius:4 }}>✕</button>
+              </div>
               <button onClick={()=>setShowSettings(s=>!s)} title="Settings" style={{ background:showSettings?`${C.cyan}20`:"none", border:`1px solid ${showSettings?C.cyan+"60":C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", transition:"all 0.2s" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={showSettings?C.cyan:C.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 6h16M4 12h16M4 18h16"/>
