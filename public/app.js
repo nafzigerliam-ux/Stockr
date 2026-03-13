@@ -1737,20 +1737,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
     }
 
     // ── Settings Panel ───────────────────────────────────────────────────────────
-    function SettingsPanel({ C, darkMode, setDarkMode, notifications, setNotifications, onClose, isLoggedIn, setIsLoggedIn, anthropicKey, setAnthropicKey, finnhubKey, setFinnhubKey, newsKey, setNewsKey }) {
-      const [email, setEmail]   = useState("");
-      const [pass, setPass]     = useState("");
-      const [loginMsg, setLoginMsg] = useState("");
-      const [aKeyInput, setAKeyInput] = useState(anthropicKey);
-      const [fKeyInput, setFKeyInput] = useState(finnhubKey);
-      const [nKeyInput, setNKeyInput] = useState(newsKey);
-      const [aSaved, setASaved] = useState(false);
-      const [fSaved, setFSaved] = useState(false);
-      const [nSaved, setNSaved] = useState(false);
-
-      const saveAKey = () => { setAnthropicKey(aKeyInput.trim()); setASaved(true); setTimeout(()=>setASaved(false),2000); };
-      const saveFKey = () => { setFinnhubKey(fKeyInput.trim()); setFSaved(true); setTimeout(()=>setFSaved(false),2000); };
-      const saveNKey = () => { setNewsKey(nKeyInput.trim()); setNSaved(true); setTimeout(()=>setNSaved(false),2000); };
+    function SettingsPanel({ C, darkMode, setDarkMode, notifications, setNotifications, onClose, currentUser, onSignOut }) {
 
       return (
         <div style={{ position:"fixed", inset:0, zIndex:100, display:"flex", alignItems:"flex-start", justifyContent:"flex-end" }} onClick={onClose}>
@@ -1779,20 +1766,21 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               </div>
             </Section>
 
-            {/* Account */}            <Section label="ACCOUNT" C={C}>
-              {isLoggedIn ? (
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                  <span style={{ fontSize:11, color:C.green }}>● {loginMsg||"Logged in"}</span>
-                  <button onClick={()=>{setIsLoggedIn(false);setLoginMsg("");}} style={{ background:"none", border:`1px solid ${C.red}44`, borderRadius:4, padding:"3px 10px", color:C.red, fontFamily:"'Space Mono',monospace", fontSize:9, cursor:"pointer" }}>LOG OUT</button>
+            {/* Account */}
+            <Section label="ACCOUNT" C={C}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                <div style={{ width:36, height:36, borderRadius:"50%", background:`linear-gradient(135deg,${C.purple},${C.cyan})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:700, color:"#fff", flexShrink:0 }}>
+                  {currentUser?.name?.[0]?.toUpperCase() || "U"}
                 </div>
-              ) : (
-                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                  <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:6, padding:"6px 10px", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11, outline:"none" }}/>
-                  <input value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="Password" style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:6, padding:"6px 10px", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11, outline:"none" }}/>
-                  {loginMsg && <span style={{ fontSize:9, color:C.red }}>{loginMsg}</span>}
-                  <button onClick={()=>{if(email&&pass){setIsLoggedIn(true);setLoginMsg("Logged in as "+email);}else setLoginMsg("Enter email and password.");}} style={{ background:`linear-gradient(135deg,${C.cyan},${C.purple})`, border:"none", borderRadius:6, padding:"7px", color:"#000", fontWeight:700, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer" }}>LOG IN</button>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:600, color:C.text }}>{currentUser?.name || "User"}</div>
+                  <div style={{ fontSize:11, color:C.textMuted }}>{currentUser?.email || ""}</div>
                 </div>
-              )}
+              </div>
+              <button onClick={onSignOut}
+                style={{ width:"100%", padding:"9px 0", borderRadius:8, border:`1px solid ${C.red}44`, background:"none", color:C.red, fontFamily:"'Space Mono',monospace", fontSize:11, fontWeight:700, cursor:"pointer", letterSpacing:"0.05em", transition:"all 0.2s" }}>
+                SIGN OUT
+              </button>
             </Section>
 
             {/* Theme */}
@@ -2328,7 +2316,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           </div>
 
           {showSettings && (
-            <SettingsPanel C={C} darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} setNotifications={setNotifications} onClose={()=>setShowSettings(false)} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} anthropicKey={anthropicKey} setAnthropicKey={setAnthropicKey} finnhubKey={finnhubKey} setFinnhubKey={setFinnhubKey} newsKey={newsKey} setNewsKey={setNewsKey}/>
+            <SettingsPanel C={C} darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} setNotifications={setNotifications} onClose={()=>setShowSettings(false)} currentUser={currentUser} onSignOut={handleSignOut}/>
           )}
 
           {/* ── TOP NAVBAR ── */}
@@ -2355,13 +2343,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               <button onClick={()=>setDarkMode(d=>!d)} title={darkMode?"Light mode":"Dark mode"} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.textMuted, transition:"all 0.2s", fontSize:14 }}>
                 {darkMode ? "☀" : "🌙"}
               </button>
-              <div style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 10px", background:"rgba(255,255,255,0.04)", borderRadius:8, border:`1px solid ${C.border}` }}>
-                <div style={{ width:22, height:22, borderRadius:"50%", background:`linear-gradient(135deg,${C.purple},${C.cyan})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700, color:"#fff" }}>
-                  {currentUser.name ? currentUser.name[0].toUpperCase() : "U"}
-                </div>
-                <span style={{ fontSize:12, color:C.textMuted, maxWidth:80, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{currentUser.name || currentUser.email}</span>
-                <button onClick={handleSignOut} title="Sign out" style={{ background:"none", border:"none", cursor:"pointer", color:C.textMuted, fontSize:11, padding:"2px 4px", borderRadius:4 }}>✕</button>
-              </div>
               <button onClick={()=>setShowSettings(s=>!s)} title="Settings" style={{ background:showSettings?`${C.cyan}20`:"none", border:`1px solid ${showSettings?C.cyan+"60":C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", transition:"all 0.2s" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={showSettings?C.cyan:C.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 6h16M4 12h16M4 18h16"/>
