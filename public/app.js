@@ -1012,7 +1012,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               <div style={{ fontSize:32, marginBottom:12 }}>📰</div>
               <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:8 }}>No API keys connected</div>
               <div style={{ fontSize:11, color:C.textMuted, lineHeight:1.6, marginBottom:6 }}>
-                Add a <span style={{color:C.cyan}}>Finnhub</span> key for free news,<br/>or <span style={{color:C.cyan}}>Alpha Vantage</span> for news + sentiment
+                News is powered by <span style={{color:C.cyan}}>Finnhub</span>
               </div>
             </div>
           ) : (
@@ -1766,7 +1766,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 {[
                   { label:"AI Advisor", desc:"Powered by Claude", color:C.purple },
                   { label:"Live Prices", desc:"Powered by Finnhub", color:C.cyan },
-                  { label:"Live News", desc:"Powered by Alpha Vantage", color:C.green },
+                  { label:"Live News", desc:"Powered by Finnhub", color:C.green },
                 ].map(({ label, desc, color }) => (
                   <div key={label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${color}33`, borderRadius:6, padding:"8px 12px" }}>
                     <div>
