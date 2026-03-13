@@ -1846,6 +1846,41 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const [hover, setHover] = useState(null);
       const svgRef = useRef(null);
 
+      // Live search state for both inputs
+      const [suggestA, setSuggestA] = useState([]);
+      const [suggestB, setSuggestB] = useState([]);
+      const [showA, setShowA] = useState(false);
+      const [showB, setShowB] = useState(false);
+      const debounceA = useRef(null);
+      const debounceB = useRef(null);
+
+      const searchSymbols = async (q, setSuggestions) => {
+        if (!q || q.length < 1) { setSuggestions([]); return; }
+        try {
+          const r = await fetch(`/api/finnhub?endpoint=search&q=${encodeURIComponent(q)}`);
+          const data = await r.json();
+          const results = (data.result || []).filter(s => s.type === "Common Stock" || s.type === "EQS" || s.type === "").slice(0, 6);
+          setSuggestions(results);
+        } catch { setSuggestions([]); }
+      };
+
+      const handleInputA = (val) => {
+        setInputA(val.toUpperCase());
+        clearTimeout(debounceA.current);
+        debounceA.current = setTimeout(() => searchSymbols(val, setSuggestA), 250);
+        setShowA(true);
+      };
+
+      const handleInputB = (val) => {
+        setInputB(val.toUpperCase());
+        clearTimeout(debounceB.current);
+        debounceB.current = setTimeout(() => searchSymbols(val, setSuggestB), 250);
+        setShowB(true);
+      };
+
+      const pickA = (sym) => { setInputA(sym); setShowA(false); setSuggestA([]); };
+      const pickB = (sym) => { setInputB(sym); setShowB(false); setSuggestB([]); };
+
       async function loadComparison(sA, sB) {
         if (!sA || !sB) return;
         if (sA.toUpperCase() === sB.toUpperCase()) { setError("Please enter two different symbols."); return; }
@@ -1928,9 +1963,49 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
           {/* Input row */}
           <div style={{ display:"flex", gap:12, alignItems:"center", marginBottom:28 }}>
-            <input value={inputA} onChange={e=>setInputA(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleCompare()} placeholder="Symbol A (e.g. AAPL)" style={{ flex:1, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+            {/* Input A with live search */}
+            <div style={{ flex:1, position:"relative" }}>
+              <input value={inputA} onChange={e=>handleInputA(e.target.value)}
+                onKeyDown={e=>{ if(e.key==="Enter"){ setShowA(false); handleCompare(); } if(e.key==="Escape") setShowA(false); }}
+                onFocus={()=>inputA&&setShowA(true)} onBlur={()=>setTimeout(()=>setShowA(false),150)}
+                placeholder="Symbol A (e.g. AAPL)"
+                style={{ width:"100%", boxSizing:"border-box", background:C.bgCard, border:`1px solid ${C.cyan}66`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+              {showA && suggestA.length > 0 && (
+                <div style={{ position:"absolute", top:"calc(100% + 4px)", left:0, right:0, zIndex:50, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:8, overflow:"hidden", boxShadow:"0 8px 32px #00000066" }}>
+                  {suggestA.map((s,i) => (
+                    <div key={i} onMouseDown={()=>pickA(s.symbol)}
+                      style={{ padding:"9px 14px", cursor:"pointer", borderBottom:i<suggestA.length-1?`1px solid ${C.border}`:"none", display:"flex", justifyContent:"space-between", alignItems:"center", background:"transparent" }}
+                      onMouseEnter={e=>e.currentTarget.style.background=C.bgCardHover}
+                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                      <span style={{ fontWeight:700, color:C.cyan, fontFamily:"'DM Mono',monospace", fontSize:13 }}>{s.symbol}</span>
+                      <span style={{ color:C.textMuted, fontSize:11, maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{s.description}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div style={{ fontSize:16, color:C.textMuted, fontWeight:700 }}>VS</div>
-            <input value={inputB} onChange={e=>setInputB(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleCompare()} placeholder="Symbol B (e.g. MSFT)" style={{ flex:1, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+            {/* Input B with live search */}
+            <div style={{ flex:1, position:"relative" }}>
+              <input value={inputB} onChange={e=>handleInputB(e.target.value)}
+                onKeyDown={e=>{ if(e.key==="Enter"){ setShowB(false); handleCompare(); } if(e.key==="Escape") setShowB(false); }}
+                onFocus={()=>inputB&&setShowB(true)} onBlur={()=>setTimeout(()=>setShowB(false),150)}
+                placeholder="Symbol B (e.g. MSFT)"
+                style={{ width:"100%", boxSizing:"border-box", background:C.bgCard, border:`1px solid ${C.purple}66`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+              {showB && suggestB.length > 0 && (
+                <div style={{ position:"absolute", top:"calc(100% + 4px)", left:0, right:0, zIndex:50, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:8, overflow:"hidden", boxShadow:"0 8px 32px #00000066" }}>
+                  {suggestB.map((s,i) => (
+                    <div key={i} onMouseDown={()=>pickB(s.symbol)}
+                      style={{ padding:"9px 14px", cursor:"pointer", borderBottom:i<suggestB.length-1?`1px solid ${C.border}`:"none", display:"flex", justifyContent:"space-between", alignItems:"center", background:"transparent" }}
+                      onMouseEnter={e=>e.currentTarget.style.background=C.bgCardHover}
+                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                      <span style={{ fontWeight:700, color:C.purple, fontFamily:"'DM Mono',monospace", fontSize:13 }}>{s.symbol}</span>
+                      <span style={{ color:C.textMuted, fontSize:11, maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{s.description}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button onClick={handleCompare} disabled={loading} style={{ padding:"10px 20px", background:`linear-gradient(135deg,${C.cyan},${C.purple})`, border:"none", borderRadius:8, color:"#fff", fontWeight:700, fontSize:13, cursor:loading?"not-allowed":"pointer", opacity:loading?0.6:1 }}>
               {loading ? "Loading..." : "Compare"}
             </button>
