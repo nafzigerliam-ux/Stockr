@@ -1487,11 +1487,54 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
     }
 
     // ── Alerts Tab ───────────────────────────────────────────────────────────────
-    function AlertsTab({ C, finnhubKey, portfolio, onAlertCount }) {
+    function AlertsTab({ C, finnhubKey, portfolio, onAlertCount, currentUser }) {
       const [quotes, setQuotes]     = useState({});
       const [loading, setLoading]   = useState(false);
       const [lastUpdated, setLastUpdated] = useState(null);
 
+      // ── Price Alerts (Supabase) ───────────────────────────────────────────────
+      const [priceAlerts, setPriceAlerts]   = useState([]);
+      const [alertSymbol, setAlertSymbol]   = useState("");
+      const [alertCond, setAlertCond]       = useState("above");
+      const [alertPrice, setAlertPrice]     = useState("");
+      const [alertSaving, setAlertSaving]   = useState(false);
+      const [alertMsg, setAlertMsg]         = useState("");
+
+      // Load price alerts from Supabase
+      useEffect(() => {
+        if (!currentUser?.id) return;
+        _supabase.from("alerts").select("*").eq("user_id", currentUser.id).eq("triggered", false)
+          .then(({ data }) => { if (data) setPriceAlerts(data); });
+      }, [currentUser?.id]);
+
+      const savePriceAlert = async () => {
+        if (!alertSymbol || !alertPrice) return setAlertMsg("Enter a symbol and price.");
+        if (!currentUser?.id) return setAlertMsg("Sign in to save alerts.");
+        setAlertSaving(true); setAlertMsg("");
+        const { error } = await _supabase.from("alerts").insert({
+          user_id: currentUser.id,
+          symbol: alertSymbol.toUpperCase().trim(),
+          condition: alertCond,
+          target_price: parseFloat(alertPrice),
+          email: currentUser.email,
+          triggered: false,
+        });
+        if (error) { setAlertMsg("Failed to save alert."); }
+        else {
+          setAlertMsg("✓ Alert saved! You'll get an email when it triggers.");
+          setAlertSymbol(""); setAlertPrice("");
+          // Reload alerts
+          const { data } = await _supabase.from("alerts").select("*").eq("user_id", currentUser.id).eq("triggered", false);
+          if (data) setPriceAlerts(data);
+        }
+        setAlertSaving(false);
+        setTimeout(() => setAlertMsg(""), 4000);
+      };
+
+      const deletePriceAlert = async (id) => {
+        await _supabase.from("alerts").delete().eq("id", id);
+        setPriceAlerts(prev => prev.filter(a => a.id !== id));
+      };
 
       const refresh = async () => {
         if (!finnhubKey || !portfolio.length) return;
@@ -1665,6 +1708,45 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       return (
         <div>
+          {/* ── Price Alert Creator ─────────────────────────────────────────── */}
+          <div style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:"18px 20px", marginBottom:20 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em", marginBottom:14 }}>🔔 SET PRICE ALERT</div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
+              <input value={alertSymbol} onChange={e=>setAlertSymbol(e.target.value.toUpperCase())}
+                placeholder="Symbol (e.g. AAPL)"
+                style={{ flex:"1 1 120px", background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, padding:"9px 12px", color:C.text, fontSize:12, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+              <select value={alertCond} onChange={e=>setAlertCond(e.target.value)}
+                style={{ flex:"0 0 auto", background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, padding:"9px 12px", color:C.text, fontSize:12, fontFamily:"'DM Sans',sans-serif", outline:"none", cursor:"pointer" }}>
+                <option value="above">rises above</option>
+                <option value="below">falls below</option>
+              </select>
+              <input value={alertPrice} onChange={e=>setAlertPrice(e.target.value)} type="number" placeholder="Target price"
+                style={{ flex:"1 1 100px", background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, padding:"9px 12px", color:C.text, fontSize:12, fontFamily:"'DM Mono',monospace", outline:"none" }}/>
+              <button onClick={savePriceAlert} disabled={alertSaving}
+                style={{ flex:"0 0 auto", background:`linear-gradient(135deg,${C.purple},${C.cyan})`, border:"none", borderRadius:8, padding:"9px 18px", color:"#fff", fontWeight:700, fontSize:12, cursor:alertSaving?"not-allowed":"pointer", opacity:alertSaving?0.7:1 }}>
+                {alertSaving ? "..." : "+ Add Alert"}
+              </button>
+            </div>
+            {alertMsg && <div style={{ marginTop:10, fontSize:11, color:alertMsg.startsWith("✓")?C.green:C.red }}>{alertMsg}</div>}
+
+            {/* Active price alerts list */}
+            {priceAlerts.length > 0 && (
+              <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:6 }}>
+                <div style={{ fontSize:10, color:C.textMuted, letterSpacing:"0.08em", marginBottom:2 }}>ACTIVE ALERTS — email: {currentUser?.email}</div>
+                {priceAlerts.map(a => (
+                  <div key={a.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 12px" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      <span style={{ fontWeight:700, color:C.cyan, fontFamily:"'DM Mono',monospace", fontSize:12 }}>{a.symbol}</span>
+                      <span style={{ color:C.textMuted, fontSize:11 }}>{a.condition === "above" ? "▲ rises above" : "▼ falls below"}</span>
+                      <span style={{ fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace", fontSize:12 }}>${Number(a.target_price).toFixed(2)}</span>
+                    </div>
+                    <button onClick={()=>deletePriceAlert(a.id)} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", padding:"2px 6px", borderRadius:4 }}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Header */}
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -2526,7 +2608,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 {tab==="advisor"   && <AIAdvisorTab C={C} aiUsed={aiUsed} setAiUsed={setAiUsed} anthropicKey={anthropicKey} portfolio={portfolio}/>}
                 {tab==="news"      && <NewsTab C={C} newsKey={newsKey} finnhubKey={finnhubKey} portfolio={portfolio} onArticleCount={setNewsCount}/>}
                 {tab==="search"    && <SearchTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} setPortfolio={setPortfolio}/>}
-                {tab==="alerts"    && <AlertsTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} onAlertCount={setAlertCount}/>}
+                {tab==="alerts"    && <AlertsTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} onAlertCount={setAlertCount} currentUser={currentUser}/>}
                 {tab==="compare"   && <CompareTab C={C} finnhubKey={finnhubKey} portfolio={portfolio}/>}
               </div>
             </main>
