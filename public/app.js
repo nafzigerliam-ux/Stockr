@@ -2601,8 +2601,24 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               </div>
             </aside>
 
+            {/* ── MOBILE BOTTOM NAV ── */}
+            <div className="mobile-bottom-nav" style={{ display:"none", position:"fixed", bottom:0, left:0, right:0, zIndex:200, background:darkMode?"rgba(4,6,15,0.97)":"rgba(255,255,255,0.97)", backdropFilter:"blur(20px)", borderTop:`1px solid ${C.border}`, padding:"6px 4px", paddingBottom:"calc(6px + env(safe-area-inset-bottom))" }}>
+              {NAV_ITEMS.map(item => (
+                <button key={item.id} onClick={()=>setTab(item.id)}
+                  style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3, padding:"6px 4px", background:"none", border:"none", cursor:"pointer", borderRadius:10, position:"relative",
+                    color: tab===item.id ? C.cyan : C.textMuted, transition:"color 0.2s" }}>
+                  {tab===item.id && <div style={{ position:"absolute", top:0, left:"20%", right:"20%", height:2, background:C.cyan, borderRadius:"0 0 2px 2px", boxShadow:`0 0 8px ${C.cyan}` }}/>}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={tab===item.id?"2":"1.5"} strokeLinecap="round" strokeLinejoin="round">
+                    <path d={item.icon}/>
+                  </svg>
+                  <span style={{ fontSize:9, fontWeight:tab===item.id?700:400, fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.02em" }}>{item.label}</span>
+                  {item.badge && <div style={{ position:"absolute", top:4, right:"18%", background:item.id==="alerts"?C.red:C.purple, color:"#fff", fontSize:8, fontWeight:700, padding:"1px 4px", borderRadius:6, minWidth:14, textAlign:"center" }}>{item.badge}</div>}
+                </button>
+              ))}
+            </div>
+
             {/* ── MAIN CONTENT ── */}
-            <main style={{ flex:1, marginLeft:220, padding:"32px 40px", minHeight:"calc(100vh - 60px)", maxWidth:"calc(100vw - 220px)" }}>
+            <main style={{ flex:1, marginLeft:"clamp(0px, 220px, 220px)", padding:"32px 40px", minHeight:"calc(100vh - 60px)", maxWidth:"calc(100vw - 220px)" }} className="main-content">
               <div key={tab} style={{ animation:"fadeIn 0.2s both", maxWidth:1100 }}>
                 {tab==="portfolio" && <PortfolioTab C={C} portfolio={portfolio} setPortfolio={setPortfolio} loadingPrices={loadingPrices} priceError={priceError} onRefresh={fetchLivePrices} finnhubKey={finnhubKey}/>}
                 {tab==="advisor"   && <AIAdvisorTab C={C} aiUsed={aiUsed} setAiUsed={setAiUsed} anthropicKey={anthropicKey} portfolio={portfolio}/>}
