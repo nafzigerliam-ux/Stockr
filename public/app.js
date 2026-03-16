@@ -2453,7 +2453,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         if (!currentUser?.id) return;
         _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
         try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
-      }, [portfolio]);
+      }, [portfolio, currentUser?.id]);
 
       // Persist API keys
       const [_keysLoaded] = useState(() => {
