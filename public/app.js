@@ -2890,7 +2890,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       // Portfolio — loaded from Supabase, persisted on change
       const [portfolio, setPortfolio] = useState([]);
       const [portfolioLoaded, setPortfolioLoaded] = useState(false);
-      const [portfolioLoaded, setPortfolioLoaded] = useState(false);
 
       // Load portfolio from Supabase when user logs in
       useEffect(() => {
@@ -2911,7 +2910,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         if (!currentUser?.id || !portfolioLoaded) return;
         _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
         try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
-      }, [portfolio, portfolioLoaded]);
+      }, [portfolio]);
 
       // Persist API keys
       const [_keysLoaded] = useState(() => {
