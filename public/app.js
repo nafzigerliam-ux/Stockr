@@ -1106,7 +1106,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       { symbol:"BINANCE:LINKUSDT", name:"Chainlink",     displaySymbol:"LINK", type:"crypto", sector:"Crypto" },
     ];
 
-    function SearchTab({ C, finnhubKey, portfolio, setPortfolio, watchlist, setWatchlist }) {
+    function SearchTab({ C, finnhubKey, portfolio, setPortfolio }) {
       const [query, setQuery]               = useState("");
       const [browseTab, setBrowseTab]       = useState("stocks");
       const [displayList, setDisplayList]   = useState([]);
@@ -1409,13 +1409,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                         )}
                       </div>
 
-                      {/* Watch button */}
-                      {(() => { const isW = (watchlist||[]).includes(item.symbol); return (
-                        <button onClick={()=>{ isW ? setWatchlist(p=>p.filter(s=>s!==item.symbol)) : setWatchlist(p=>[...p,item.symbol]); }}
-                          style={{ background:isW?'rgba(167,139,250,0.15)':'none', border:'1px solid '+(isW?'#a78bfa':'#1a2840'), borderRadius:8, padding:'6px 10px', color:isW?'#a78bfa':'#5a7090', fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:'pointer', transition:'all 0.2s', marginRight:6 }}>
-                          {isW ? '👁 WATCHING' : '👁 WATCH'}
-                        </button>
-                      ); })()}
                       {/* Add button */}
                       {isAdded ? (
                         <div style={{ background:C.green+"22", border:`1px solid ${C.green}55`, borderRadius:8, padding:"6px 14px", color:C.green, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace" }}>✓ ADDED</div>
@@ -1928,81 +1921,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
     }
 
     // ── Main App ─────────────────────────────────────────────────────────────────
-    
-    // ── Watchlist Tab ─────────────────────────────────────────────────────────────
-    function WatchlistTab({ C, finnhubKey, watchlist, setWatchlist }) {
-      const [quotes, setQuotes] = React.useState({});
-      const [loading, setLoading] = React.useState(false);
-
-      const refresh = async () => {
-        if (!watchlist.length) return;
-        setLoading(true);
-        const fetched = {};
-        await Promise.allSettled(watchlist.map(async sym => {
-          try {
-            const q = await fetchQuote(sym);
-            if (q.c > 0) fetched[sym] = { price: q.c, change: q.dp || 0, open: q.o || 0 };
-          } catch {}
-        }));
-        setQuotes(fetched);
-        setLoading(false);
-      };
-
-      React.useEffect(() => { refresh(); }, [watchlist.length]);
-
-      return (
-        <div>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:'0.08em' }}>WATCHLIST</div>
-            <button onClick={refresh} disabled={loading} style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'5px 12px', color:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:'pointer' }}>
-              {loading ? '···' : '↻ REFRESH'}
-            </button>
-          </div>
-          {watchlist.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'60px 20px', color:C.textMuted }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>👁</div>
-              <div style={{ fontSize:16, fontWeight:600, color:C.text, marginBottom:8 }}>Your watchlist is empty</div>
-              <div style={{ fontSize:12 }}>Go to Search and click 👁 WATCH on any stock</div>
-            </div>
-          ) : (
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              {watchlist.map(sym => {
-                const q = quotes[sym];
-                const isUp = q ? q.change >= 0 : true;
-                return (
-                  <div key={sym} style={{ background:C.bgCard, border:'1px solid '+C.border, borderRadius:12, padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-                      <div style={{ width:42, height:42, borderRadius:10, background:'linear-gradient(135deg,'+C.cyan+'22,'+C.purple+'22)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:11, color:C.cyan, fontFamily:"'Space Mono',monospace" }}>
-                        {sym.slice(0,3)}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight:700, color:C.text, fontSize:15, fontFamily:"'DM Mono',monospace" }}>{sym}</div>
-                        <div style={{ fontSize:11, color:C.textMuted, marginTop:2 }}>Watching</div>
-                      </div>
-                    </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:16 }}>
-                      {q ? (
-                        <>
-                          <div style={{ textAlign:'right' }}>
-                            <div style={{ fontWeight:700, color:C.text, fontSize:16, fontFamily:"'DM Mono',monospace" }}>${q.price.toFixed(2)}</div>
-                            <div style={{ fontSize:11, color:isUp?C.green:C.red, marginTop:2 }}>{isUp?'▲':'▼'} {Math.abs(q.change).toFixed(2)}%</div>
-                          </div>
-                        </>
-                      ) : (
-                        <div style={{ color:C.textDim, fontSize:12 }}>Loading...</div>
-                      )}
-                      <button onClick={()=>setWatchlist(prev=>prev.filter(s=>s!==sym))}
-                        style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'6px 10px', color:C.textMuted, fontSize:11, cursor:'pointer' }}>✕</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      );
-    }
-
     const TICKER_POOL = [
       {sym:"BINANCE:BTCUSDT", l:"BTC"},
       {sym:"BINANCE:ETHUSD",  l:"ETH"},
@@ -2405,7 +2323,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const [showSettings, setShowSettings]   = useState(false);
       const [isLoggedIn, setIsLoggedIn]       = useState(false);
       const [aiUsed, setAiUsed]               = useState(0);
-      const [watchlist, setWatchlist]         = useState(() => { try { const s = localStorage.getItem("stocker_watchlist"); return s ? JSON.parse(s) : []; } catch { return []; } });
       const [currentUser, setCurrentUser]     = useState(null);
       const [authLoading, setAuthLoading]     = useState(true);
 
@@ -2556,7 +2473,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         { id:"news",      label:"News",       icon:"M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z", badge: newsCount||null },
         { id:"search",    label:"Search",     icon:"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
         { id:"alerts",    label:"Alerts",     icon:"M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", badge: alertCount||null },
-        { id:"watchlist", label:"Watchlist", icon:"M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" },
         { id:"compare",   label:"Compare",    icon:"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
       ];
 
@@ -2707,9 +2623,8 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 {tab==="portfolio" && <PortfolioTab C={C} portfolio={portfolio} setPortfolio={setPortfolio} loadingPrices={loadingPrices} priceError={priceError} onRefresh={fetchLivePrices} finnhubKey={finnhubKey}/>}
                 {tab==="advisor"   && <AIAdvisorTab C={C} aiUsed={aiUsed} setAiUsed={setAiUsed} anthropicKey={anthropicKey} portfolio={portfolio}/>}
                 {tab==="news"      && <NewsTab C={C} newsKey={newsKey} finnhubKey={finnhubKey} portfolio={portfolio} onArticleCount={setNewsCount}/>}
-                {tab==="search"    && <SearchTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} setPortfolio={setPortfolio} watchlist={watchlist} setWatchlist={setWatchlist}/>}
+                {tab==="search"    && <SearchTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} setPortfolio={setPortfolio}/>}
                 {tab==="alerts"    && <AlertsTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} onAlertCount={setAlertCount} currentUser={currentUser}/>}
-                {tab==="watchlist" && <WatchlistTab C={C} finnhubKey={finnhubKey} watchlist={watchlist} setWatchlist={setWatchlist}/>}
                 {tab==="compare"   && <CompareTab C={C} finnhubKey={finnhubKey} portfolio={portfolio}/>}
               </div>
             </main>
