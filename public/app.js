@@ -2393,17 +2393,6 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       const C = darkMode ? DARK : LIGHT;
 
-
-      // Inject mobile CSS
-      useEffect(() => {
-        const id = 'stockr-mobile-css';
-        if (document.getElementById(id)) return;
-        const s = document.createElement('style');
-        s.id = id;
-        s.textContent = '@media(max-width:768px){aside{display:none!important}.main-content{margin-left:0!important;padding:12px!important;max-width:100vw!important;padding-bottom:80px!important}.mobile-bottom-nav{display:flex!important}}@media(min-width:769px){.mobile-bottom-nav{display:none!important}}';
-        document.head.appendChild(s);
-      }, []);
-
       // Clock
       useEffect(() => {
         const t = setInterval(() => setTime(new Date()), 1000);
