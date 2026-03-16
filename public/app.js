@@ -29,7 +29,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       inputBg:"rgba(0,0,0,0.03)", inputBorder:"#dde5f0",
     };
 
-    // Base portfolio ÃÂ¢ÃÂÃÂ prices get overwritten by live data
+    // Base portfolio — prices get overwritten by live data
     const BASE_PORTFOLIO = [
       { symbol:"NVDA",  name:"NVIDIA Corp",    shares:12, avg:485.2,  sector:"Tech"     },
       { symbol:"AAPL",  name:"Apple Inc",      shares:25, avg:172.5,  sector:"Tech"     },
@@ -60,9 +60,9 @@ const { useState, useEffect, useRef, useCallback } = React;
     ];
 
     const FALLBACK = {
-      nvda:      "**NVDA Analysis** ÃÂ¢ÃÂÃÂ\n\nNVIDIA is a leading AI infrastructure play. Check current price vs your average for real gain/loss. Key risk: high P/E valuation sensitive to rate changes. Consensus target: ~$950.",
-      rebalance: "**Portfolio Rebalance Suggestion** ÃÂ¢ÃÂÃÂ\n\nTech concentration may exceed recommended 40-50%.\n\nÃÂ¢ÃÂÃÂ¢ Consider trimming top gainers\nÃÂ¢ÃÂÃÂ¢ Add healthcare or dividend exposure\nÃÂ¢ÃÂÃÂ¢ Reduces volatility by ~18% historically.",
-      tsla:      "**TSLA Risk Assessment** ÃÂ¢ÃÂÃÂ \n\nTesla faces margin compression and BYD competition. FSD licensing and Energy division show promise. Consider a stop-loss strategy if holding.",
+      nvda:      "**NVDA Analysis** ↗\n\nNVIDIA is a leading AI infrastructure play. Check current price vs your average for real gain/loss. Key risk: high P/E valuation sensitive to rate changes. Consensus target: ~$950.",
+      rebalance: "**Portfolio Rebalance Suggestion** ⚖\n\nTech concentration may exceed recommended 40-50%.\n\n• Consider trimming top gainers\n• Add healthcare or dividend exposure\n• Reduces volatility by ~18% historically.",
+      tsla:      "**TSLA Risk Assessment** ⚠\n\nTesla faces margin compression and BYD competition. FSD licensing and Energy division show promise. Consider a stop-loss strategy if holding.",
       default:   "I can analyze your portfolio, suggest rebalancing strategies, explain market trends, or help research specific stocks. What would you like to explore?",
     };
 
@@ -76,7 +76,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 
     const AI_LIMIT = 9999;
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ API helpers ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── API helpers ──────────────────────────────────────────────────────────────
     async function fetchQuote(symbol, finnhubKey) {
       const r = await fetch(`/api/finnhub?endpoint=quote&symbol=${encodeURIComponent(symbol)}`);
       if (!r.ok) throw new Error(`Finnhub ${r.status}`);
@@ -106,7 +106,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       return data.content?.map(b => b.text || "").join("") || "";
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Small UI helpers ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Small UI helpers ─────────────────────────────────────────────────────────
     function Spinner({ color }) {
       return <div style={{ width:12, height:12, border:`2px solid ${color}44`, borderTop:`2px solid ${color}`, borderRadius:"50%", animation:"spin 0.8s linear infinite", display:"inline-block" }} />;
     }
@@ -143,7 +143,7 @@ const { useState, useEffect, useRef, useCallback } = React;
     function PerformanceGraph({ C, portfolio, finnhubKey }) {
       const W=580, H=110, PAD=10;
       const [range, setRange]     = useState("1M");
-      const [cache, setCache]     = useState({});   // range ÃÂ¢ÃÂÃÂ data array
+      const [cache, setCache]     = useState({});   // range → data array
       const [loading, setLoading] = useState(false);
       const [hover, setHover]     = useState(null);
       const svgRef = useRef(null);
@@ -163,7 +163,7 @@ const { useState, useEffect, useRef, useCallback } = React;
         });
       };
 
-      // Portfolio signature for cache invalidation ÃÂ¢ÃÂÃÂ includes shares+avg so ADD MORE triggers refresh
+      // Portfolio signature for cache invalidation — includes shares+avg so ADD MORE triggers refresh
       const portfolioSig = portfolio.map(h=>`${h.symbol}:${h.shares}:${h.avg}:${h.price||0}`).join(",");
 
       useEffect(() => {
@@ -224,7 +224,7 @@ const { useState, useEffect, useRef, useCallback } = React;
             sorted[sorted.length-1].val = todayValue;
             setCache(c => ({...c, [range]: sorted}));
           } else {
-            // Candles unavailable (free tier) ÃÂ¢ÃÂÃÂ use estimated curve
+            // Candles unavailable (free tier) — use estimated curve
             setCache(c => ({...c, [range]: buildEstimated(tab.days, portfolio)}));
           }
           setLoading(false);
@@ -292,9 +292,9 @@ const { useState, useEffect, useRef, useCallback } = React;
                   {t.label}
                 </button>
               ))}
-              {loading && <span style={{ fontSize:9, color:C.cyan, marginLeft:4 }}>ÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·</span>}
+              {loading && <span style={{ fontSize:9, color:C.cyan, marginLeft:4 }}>···</span>}
               {!loading && !cache[range] && finnhubKey && <span style={{ fontSize:8, color:C.textDim, marginLeft:4, fontFamily:"'Space Mono',monospace" }}>EST</span>}
-              {!finnhubKey && <span style={{ fontSize:8, color:C.yellow, marginLeft:4 }}>no key ÃÂ¢ÃÂÃÂ estimated</span>}
+              {!finnhubKey && <span style={{ fontSize:8, color:C.yellow, marginLeft:4 }}>no key — estimated</span>}
             </div>
 
             {/* Stats */}
@@ -309,7 +309,7 @@ const { useState, useEffect, useRef, useCallback } = React;
                 </>
               ) : (
                 <>
-                  <span style={{ fontSize:12, fontWeight:700, color, fontFamily:"'Space Mono',monospace" }}>{positive?"ÃÂ¢ÃÂÃÂ²":"ÃÂ¢ÃÂÃÂ¼"} {Math.abs(gainPct)}%</span>
+                  <span style={{ fontSize:12, fontWeight:700, color, fontFamily:"'Space Mono',monospace" }}>{positive?"▲":"▼"} {Math.abs(gainPct)}%</span>
                   <span style={{ fontSize:11, color, fontFamily:"'Space Mono',monospace" }}>{positive?"+":"-"}${Math.abs(gainAbs).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
                   <span style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>${todayValue.toLocaleString(undefined,{maximumFractionDigits:0})}</span>
                 </>
@@ -363,7 +363,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Add Stock Inline Panel ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Add Stock Inline Panel ───────────────────────────────────────────────────
     function AddStockPanel({ C, onSave, onClose, finnhubKey }) {
       const [symbol,    setSymbol]    = useState("");
       const [shares,    setShares]    = useState("");
@@ -400,11 +400,11 @@ const { useState, useEffect, useRef, useCallback } = React;
               <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em" }}>ADD STOCK</div>
               <div style={{ fontSize:9, color:C.textMuted, marginTop:2 }}>Enter the details of your position</div>
             </div>
-            <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1, padding:4 }}>ÃÂ¢ÃÂÃÂ</button>
+            <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1, padding:4 }}>✕</button>
           </div>
 
           {error && (
-            <div style={{ background:C.red+"18", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:12, fontSize:10, color:C.red }}>ÃÂ¢ÃÂÃÂ  {error}</div>
+            <div style={{ background:C.red+"18", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:12, fontSize:10, color:C.red }}>⚠ {error}</div>
           )}
 
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:12 }}>
@@ -449,14 +449,14 @@ const { useState, useEffect, useRef, useCallback } = React;
           <div style={{ display:"flex", gap:10 }}>
             <button onClick={onClose} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 20px", color:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer" }}>CANCEL</button>
             <button onClick={handleSubmit} disabled={looking} style={{ flex:1, background:`linear-gradient(135deg,${C.cyan},${C.purple})`, border:"none", borderRadius:8, padding:"10px", color:"#000", fontWeight:700, fontFamily:"'Space Mono',monospace", fontSize:11, cursor:looking?"wait":"pointer", opacity:looking?0.7:1 }}>
-              {looking ? "ADDINGÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·" : "+ ADD TO PORTFOLIO"}
+              {looking ? "ADDING···" : "+ ADD TO PORTFOLIO"}
             </button>
           </div>
         </div>
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Edit Holding Modal (kept for editing existing) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Edit Holding Modal (kept for editing existing) ───────────────────────────
     function HoldingModal({ C, existing, onSave, onClose }) {
       const isEdit = !!existing;
       const [symbol,    setSymbol]    = useState(existing?.symbol    || "");
@@ -497,11 +497,11 @@ const { useState, useEffect, useRef, useCallback } = React;
                 <div style={{ fontSize:13, fontWeight:700, color:C.text, letterSpacing:"0.1em" }}>{isEdit?"EDIT HOLDING":"ADD HOLDING"}</div>
                 <div style={{ fontSize:9, color:C.textMuted, marginTop:2 }}>{isEdit?`Editing ${existing.symbol}`:"Add a new position to your portfolio"}</div>
               </div>
-              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1 }}>ÃÂ¢ÃÂÃÂ</button>
+              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1 }}>✕</button>
             </div>
 
             {error && (
-              <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 10px", marginBottom:12, fontSize:10, color:C.red }}>ÃÂ¢ÃÂÃÂ  {error}</div>
+              <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 10px", marginBottom:12, fontSize:10, color:C.red }}>⚠ {error}</div>
             )}
 
             <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -574,12 +574,110 @@ const { useState, useEffect, useRef, useCallback } = React;
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Portfolio Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
-    function PortfolioTab({ C, portfolio, setPortfolio, loadingPrices, priceError, onRefresh, finnhubKey }) {
+    // ── Portfolio Tab ────────────────────────────────────────────────────────────
+    // ── Stock Detail Modal ───────────────────────────────────────────────────────
+    function StockDetailModal({ C, symbol, holding, onClose, finnhubKey }) {
+      const [quote, setQuote]     = useState(null);
+      const [news, setNews]       = useState([]);
+      const [candle, setCandle]   = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        (async () => {
+          try {
+            const [q, n, today, weekAgo] = [
+              await fetchQuote(symbol),
+              await fetch(`/api/finnhub?endpoint=company-news&symbol=${symbol}&from=${new Date(Date.now()-7*86400000).toISOString().slice(0,10)}&to=${new Date().toISOString().slice(0,10)}`).then(r=>r.json()),
+              Math.floor(Date.now()/1000),
+              Math.floor((Date.now()-30*86400000)/1000),
+            ];
+            setQuote(q);
+            setNews(Array.isArray(n) ? n.slice(0,5) : []);
+            const c = await fetch(`/api/finnhub?endpoint=candle&symbol=${symbol}&resolution=D&from=${weekAgo}&to=${today}`).then(r=>r.json());
+            if (c.s === "ok") setCandle(c);
+          } catch(e) {}
+          setLoading(false);
+        })();
+      }, [symbol]);
+
+      const pct = quote ? ((quote.c - quote.pc) / quote.pc * 100) : 0;
+      const gainPct = holding && quote ? ((quote.c - holding.avg) / holding.avg * 100) : null;
+      const gainDollar = holding && quote ? ((quote.c - holding.avg) * holding.shares) : null;
+
+      return (
+        <div onClick={onClose} style={{ position:"fixed", inset:0, zIndex:300, background:"rgba(0,0,0,0.7)", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
+          <div onClick={e=>e.stopPropagation()} style={{ width:"100%", maxWidth:560, background:C.bgCard, borderRadius:20, border:`1px solid ${C.border}`, maxHeight:"90vh", overflowY:"auto", animation:"fadeIn 0.2s both" }}>
+            {/* Header */}
+            <div style={{ padding:"20px 24px", borderBottom:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <div>
+                <div style={{ fontSize:22, fontWeight:800, color:C.cyan, fontFamily:"'DM Mono',monospace" }}>{symbol}</div>
+                {holding && <div style={{ fontSize:11, color:C.textMuted }}>{holding.shares} shares · avg ${holding.avg?.toFixed(2)}</div>}
+              </div>
+              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:20, cursor:"pointer" }}>✕</button>
+            </div>
+
+            <div style={{ padding:"20px 24px" }}>
+              {loading ? (
+                <div style={{ textAlign:"center", color:C.textMuted, padding:40 }}>Loading...</div>
+              ) : (
+                <>
+                  {/* Price */}
+                  {quote && (
+                    <div style={{ display:"flex", gap:16, marginBottom:20, flexWrap:"wrap" }}>
+                      <div style={{ flex:1, background:C.bg, borderRadius:12, padding:"14px 16px", border:`1px solid ${C.border}` }}>
+                        <div style={{ fontSize:11, color:C.textMuted, marginBottom:4 }}>CURRENT PRICE</div>
+                        <div style={{ fontSize:26, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>${quote.c?.toFixed(2)}</div>
+                        <div style={{ fontSize:12, color:pct>=0?C.green:C.red }}>{pct>=0?"▲":"▼"} {Math.abs(pct).toFixed(2)}% today</div>
+                      </div>
+                      {gainPct !== null && (
+                        <div style={{ flex:1, background:C.bg, borderRadius:12, padding:"14px 16px", border:`1px solid ${gainPct>=0?C.green+"44":C.red+"44"}` }}>
+                          <div style={{ fontSize:11, color:C.textMuted, marginBottom:4 }}>YOUR P&L</div>
+                          <div style={{ fontSize:26, fontWeight:700, color:gainPct>=0?C.green:C.red, fontFamily:"'DM Mono',monospace" }}>{gainPct>=0?"+":""}{gainPct?.toFixed(2)}%</div>
+                          <div style={{ fontSize:12, color:gainPct>=0?C.green:C.red }}>{gainDollar>=0?"+$":"-$"}{Math.abs(gainDollar)?.toFixed(0)}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Stats */}
+                  {quote && (
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:20 }}>
+                      {[["High", "$"+quote.h?.toFixed(2)],["Low","$"+quote.l?.toFixed(2)],["Prev Close","$"+quote.pc?.toFixed(2)]].map(([l,v])=>(
+                        <div key={l} style={{ background:C.bg, borderRadius:8, padding:"10px 12px", border:`1px solid ${C.border}` }}>
+                          <div style={{ fontSize:10, color:C.textMuted }}>{l}</div>
+                          <div style={{ fontSize:13, fontWeight:600, color:C.text, fontFamily:"'DM Mono',monospace" }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Recent News */}
+                  {news.length > 0 && (
+                    <div>
+                      <div style={{ fontSize:11, fontWeight:700, color:C.textMuted, letterSpacing:"0.1em", marginBottom:10 }}>RECENT NEWS</div>
+                      {news.map((a,i) => (
+                        <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
+                          style={{ display:"block", padding:"10px 0", borderBottom:i<news.length-1?`1px solid ${C.border}`:"none", textDecoration:"none" }}>
+                          <div style={{ fontSize:12, color:C.text, lineHeight:1.5, marginBottom:3 }}>{a.headline}</div>
+                          <div style={{ fontSize:10, color:C.textMuted }}>{a.source} · {a.datetime ? new Date(a.datetime*1000).toLocaleDateString() : ""}</div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function PortfolioTab({ C, portfolio, setPortfolio, loadingPrices, priceError, onRefresh, finnhubKey, onStockClick }) {
       const [showAdd,       setShowAdd]       = useState(false);
       const [editTarget,    setEditTarget]    = useState(null);
       const [confirmDel,    setConfirmDel]    = useState(null);
       const [expandedSymbol, setExpandedSymbol] = useState(null);
+      const [selectedStock, setSelectedStock]   = useState(null);
 
       const totalValue = portfolio.reduce((s,h) => s + h.shares * (h.price||0), 0);
       const totalCost  = portfolio.reduce((s,h) => s + h.shares * h.avg, 0);
@@ -619,7 +717,7 @@ const { useState, useEffect, useRef, useCallback } = React;
           {confirmDel && (
             <div style={{ position:"fixed", inset:0, zIndex:200, background:"#00000088", display:"flex", alignItems:"center", justifyContent:"center", padding:20 }} onClick={()=>setConfirmDel(null)}>
               <div onClick={e=>e.stopPropagation()} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:12, padding:22, maxWidth:300, width:"100%", animation:"fadeIn 0.15s both", textAlign:"center" }}>
-                <div style={{ fontSize:24, marginBottom:10 }}>ÃÂ¢ÃÂÃÂ </div>
+                <div style={{ fontSize:24, marginBottom:10 }}>⚠</div>
                 <div style={{ fontSize:13, fontWeight:700, color:C.text, marginBottom:6 }}>Remove {confirmDel}?</div>
                 <div style={{ fontSize:11, color:C.textMuted, marginBottom:16 }}>This will remove the position from your portfolio.</div>
                 <div style={{ display:"flex", gap:8 }}>
@@ -635,9 +733,9 @@ const { useState, useEffect, useRef, useCallback } = React;
           {/* Summary cards */}
           <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:18 }}>
             {[
-              { label:"Portfolio Value", value: loadingPrices ? "ÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·" : `$${(totalValue/1000).toFixed(1)}K`, color:C.cyan  },
-              { label:"Total Gain",      value: loadingPrices ? "ÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·" : `${totalGain>=0?"+":"-"}$${(Math.abs(totalGain)/1000).toFixed(1)}K`, color:totalGain>=0?C.green:C.red },
-              { label:"Return",          value: loadingPrices ? "ÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·" : `${totalGain>=0?"+":""}${totalPct}%`, color:totalGain>=0?C.green:C.red },
+              { label:"Portfolio Value", value: loadingPrices ? "···" : `$${(totalValue/1000).toFixed(1)}K`, color:C.cyan  },
+              { label:"Total Gain",      value: loadingPrices ? "···" : `${totalGain>=0?"+":"-"}$${(Math.abs(totalGain)/1000).toFixed(1)}K`, color:totalGain>=0?C.green:C.red },
+              { label:"Return",          value: loadingPrices ? "···" : `${totalGain>=0?"+":""}${totalPct}%`, color:totalGain>=0?C.green:C.red },
             ].map(({label,value,color}) => (
               <div key={label} style={{ background:`linear-gradient(135deg,${color}08,${C.bgCard})`, border:`1px solid ${color}25`, borderRadius:14, padding:"14px 16px", position:"relative", overflow:"hidden" }}>
                 <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${color}80,transparent)` }}/>
@@ -655,18 +753,18 @@ const { useState, useEffect, useRef, useCallback } = React;
                   <Spinner color={C.cyan}/> Fetching live prices...
                 </div>
               )}
-              {priceError && <div style={{ fontSize:10, color:C.yellow }}>ÃÂ¢ÃÂÃÂ  {priceError}</div>}
+              {priceError && <div style={{ fontSize:10, color:C.yellow }}>⚠ {priceError}</div>}
               {!loadingPrices && !priceError && portfolio.length > 0 && (
-                <div style={{ fontSize:9, color:C.green }}>ÃÂ¢ÃÂÃÂ Live prices</div>
+                <div style={{ fontSize:9, color:C.green }}>● Live prices</div>
               )}
             </div>
-            <button onClick={onRefresh} disabled={loadingPrices} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 12px", color:loadingPrices?C.textDim:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:loadingPrices?"not-allowed":"pointer" }}>ÃÂ¢ÃÂÃÂ» REFRESH</button>
+            <button onClick={onRefresh} disabled={loadingPrices} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 12px", color:loadingPrices?C.textDim:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:loadingPrices?"not-allowed":"pointer" }}>↻ REFRESH</button>
           </div>
 
           {/* Holdings */}
           {portfolio.length === 0 ? (
             <div style={{ textAlign:"center", padding:"40px 0", border:`1px dashed ${C.border}`, borderRadius:8 }}>
-              <div style={{ fontSize:28, marginBottom:10 }}>ÃÂ°ÃÂÃÂÃÂ</div>
+              <div style={{ fontSize:28, marginBottom:10 }}>📊</div>
               <div style={{ fontSize:12, color:C.textMuted, fontFamily:"'Space Mono',monospace", marginBottom:6 }}>No holdings yet</div>
               <div style={{ fontSize:10, color:C.textDim }}>Go to the SEARCH tab to find and add stocks</div>
             </div>
@@ -687,16 +785,16 @@ const { useState, useEffect, useRef, useCallback } = React;
                 return (
                   <div key={h.symbol} style={{ background:C.bgCard, border:`1px solid ${isOpen?C.cyan+"55":C.border}`, borderRadius:14, overflow:"hidden", transition:"border-color 0.2s", animation:`fadeIn 0.3s ${i*0.05}s both`, position:"relative" }}>
 
-                    {/* Main row ÃÂ¢ÃÂÃÂ clickable */}
+                    {/* Main row — clickable */}
                     <div style={{ padding:"13px 16px", display:"grid", gridTemplateColumns:"auto 1fr auto auto", gap:12, alignItems:"center", cursor:"pointer", position:"relative" }}
-                      onClick={()=>setExpandedSymbol(isOpen?null:h.symbol)}
+                      onClick={()=>onStockClick && onStockClick(h.symbol, h)}
                       onMouseEnter={e=>{e.currentTarget.style.background=C.bgCardHover;e.currentTarget.querySelector(".row-actions").style.opacity="1";}}
                       onMouseLeave={e=>{e.currentTarget.style.background="";e.currentTarget.querySelector(".row-actions").style.opacity="0";}}
                     >
                       {/* Hover actions */}
                       <div className="row-actions" style={{ position:"absolute", top:7, right:8, display:"flex", gap:4, opacity:0, transition:"opacity 0.15s", zIndex:2 }}>
                         <button onClick={e=>{e.stopPropagation();setEditTarget(h);}} style={{ background:C.bgCard, border:`1px solid ${C.cyan}44`, borderRadius:4, padding:"2px 8px", color:C.cyan, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>EDIT</button>
-                        <button onClick={e=>{e.stopPropagation();setConfirmDel(h.symbol);}} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:4, padding:"2px 8px", color:C.red, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>ÃÂ¢ÃÂÃÂ</button>
+                        <button onClick={e=>{e.stopPropagation();setConfirmDel(h.symbol);}} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:4, padding:"2px 8px", color:C.red, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>✕</button>
                       </div>
 
                       {/* Logo */}
@@ -711,10 +809,10 @@ const { useState, useEffect, useRef, useCallback } = React;
                         </div>
                         <div style={{ fontSize:10, color:C.textMuted }}>
                           <span style={{ fontFamily:"'Space Mono',monospace" }}>{h.shares} shares</span>
-                          <span style={{ margin:"0 5px", opacity:0.4 }}>ÃÂÃÂ·</span>
+                          <span style={{ margin:"0 5px", opacity:0.4 }}>·</span>
                           <span>avg ${h.avg}</span>
                           {h.dateAdded && <>
-                            <span style={{ margin:"0 5px", opacity:0.4 }}>ÃÂÃÂ·</span>
+                            <span style={{ margin:"0 5px", opacity:0.4 }}>·</span>
                             <span style={{ color:C.cyan, fontSize:9 }}>since {new Date(h.dateAdded).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"})}</span>
                           </>}
                         </div>
@@ -731,7 +829,7 @@ const { useState, useEffect, useRef, useCallback } = React;
                           ? <div style={{ display:"flex", justifyContent:"flex-end" }}><Spinner color={C.cyan}/></div>
                           : <>
                               <div style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>${price.toFixed(2)}</div>
-                              <div style={{ fontSize:11, color:pos?C.green:C.red, marginTop:2 }}>{pos?"ÃÂ¢ÃÂÃÂ²":"ÃÂ¢ÃÂÃÂ¼"} {Math.abs(h.change||0).toFixed(2)}%</div>
+                              <div style={{ fontSize:11, color:pos?C.green:C.red, marginTop:2 }}>{pos?"▲":"▼"} {Math.abs(h.change||0).toFixed(2)}%</div>
                               <div style={{ fontSize:10, color:totalPos?C.green+"99":C.red+"99" }}>{gain>=0?"+":""}{gain.toFixed(0)}</div>
                             </>
                         }
@@ -785,7 +883,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ AI Advisor Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── AI Advisor Tab ───────────────────────────────────────────────────────────
     function AIAdvisorTab({ C, aiUsed, setAiUsed, anthropicKey, portfolio }) {
       const [messages, setMessages] = useState([{ role:"ai", text:FALLBACK.default }]);
       const [input, setInput]       = useState("");
@@ -798,13 +896,13 @@ const { useState, useEffect, useRef, useCallback } = React;
       useEffect(() => { endRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
       const portfolioSummary = portfolio.map(h =>
-        `${h.symbol}(${h.shares}@avg$${h.avg}ÃÂ¢ÃÂÃÂ$${(h.price||h.avg).toFixed(2)},${((((h.price||h.avg)-h.avg)/h.avg)*100).toFixed(1)}%)`
+        `${h.symbol}(${h.shares}@avg$${h.avg}→$${(h.price||h.avg).toFixed(2)},${((((h.price||h.avg)-h.avg)/h.avg)*100).toFixed(1)}%)`
       ).join(", ");
 
       const send = async (text) => {
         const msg = (text || input).trim();
         if (!msg) return;
-        if (!hasKey) { setApiError("Add your Anthropic API key in Settings ÃÂ¢ÃÂÃÂ to use AI features."); return; }
+        if (!hasKey) { setApiError("Add your Anthropic API key in Settings ⚙ to use AI features."); return; }
         if (remaining === 0) return;
         setInput(""); setApiError("");
         setMessages(prev => [...prev, { role:"user", text:msg }]);
@@ -812,11 +910,11 @@ const { useState, useEffect, useRef, useCallback } = React;
         setLoading(true);
         try {
           const aiText = await callClaude({
-            system: `You are Stockr AI's Financial Companion ÃÂ¢ÃÂÃÂ a sharp, intelligent assistant built into a personal portfolio intelligence dashboard. You have deep knowledge of financial markets, investing strategy, macroeconomics, and portfolio management.
+            system: `You are Stockr AI's Financial Companion — a sharp, intelligent assistant built into a personal portfolio intelligence dashboard. You have deep knowledge of financial markets, investing strategy, macroeconomics, and portfolio management.
 
 ## Personality
 - Confident but not arrogant. Direct but not cold.
-- Talk like a smart friend who happens to be a financial analyst ÃÂ¢ÃÂÃÂ not a stiff corporate advisor.
+- Talk like a smart friend who happens to be a financial analyst — not a stiff corporate advisor.
 - Brief by default. Go deep only when asked.
 - Never start a response with "I", "Great question", or "Sure!".
 - Don't repeat the user's question back before answering.
@@ -824,7 +922,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 ## Portfolio Context
 The user's current portfolio: ${portfolioSummary}
 
-Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rather than dumping raw numbers back. For example, instead of "You have 12 shares of NVDA", say "NVDA is your biggest position ÃÂ¢ÃÂÃÂ worth watching if AI sentiment shifts."
+Use this data actively — synthesize it into insight rather than dumping raw numbers back. For example, instead of "You have 12 shares of NVDA", say "NVDA is your biggest position — worth watching if AI sentiment shifts."
 
 ## What You Help With
 - Portfolio analysis: concentration risk, sector exposure, winners/losers
@@ -846,7 +944,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           setMessages(prev => [...prev, { role:"ai", text:aiText || getFallback(msg) }]);
         } catch(e) {
           setAiUsed(u => u-1);
-          setApiError(e.message === "NO_KEY" ? "Add your Anthropic API key in Settings ÃÂ¢ÃÂÃÂ." : `Error: ${e.message}`);
+          setApiError(e.message === "NO_KEY" ? "Add your Anthropic API key in Settings ⚙." : `Error: ${e.message}`);
           setMessages(prev => prev.slice(0,-1));
         }
         setLoading(false);
@@ -862,11 +960,11 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
       return (
         <div style={{ display:"flex", flexDirection:"column", height:480 }}>
-          {/* Status ÃÂ¢ÃÂÃÂ compact row with small query dots */}
+          {/* Status — compact row with small query dots */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, paddingBottom:10, borderBottom:`1px solid ${C.border}` }}>
             {hasKey
-              ? <span style={{ fontSize:10, color:C.green }}>ÃÂ¢ÃÂÃÂ AI Connected</span>
-              : <span style={{ fontSize:10, color:C.yellow }}>ÃÂ¢ÃÂÃÂ Add Anthropic key in Settings</span>
+              ? <span style={{ fontSize:10, color:C.green }}>● AI Connected</span>
+              : <span style={{ fontSize:10, color:C.yellow }}>⚙ Add Anthropic key in Settings</span>
             }
             {hasKey && (
               <div style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -881,7 +979,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           </div>
 
           {apiError && (
-            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red, fontFamily:"'Space Mono',monospace" }}>ÃÂ¢ÃÂÃÂ  {apiError}</div>
+            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red, fontFamily:"'Space Mono',monospace" }}>⚠ {apiError}</div>
           )}
 
           {/* Messages */}
@@ -907,7 +1005,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             <div ref={endRef}/>
           </div>
 
-          {/* Quick prompts ÃÂ¢ÃÂÃÂ 2x2 grid */}
+          {/* Quick prompts — 2x2 grid */}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, margin:"8px 0" }}>
             {["Analyze portfolio","Rebalance advice","Biggest risk","Best performer"].map(s=>(
               <button key={s} onClick={()=>send(s)} disabled={!hasKey||remaining<=0} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, padding:"6px 10px", fontSize:10, color:(hasKey&&remaining>0)?C.textMuted:C.textDim, cursor:(hasKey&&remaining>0)?"pointer":"not-allowed", fontFamily:"'Space Mono',monospace", transition:"all 0.2s", textAlign:"left" }}
@@ -919,7 +1017,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
           {/* Input */}
           <div style={{ display:"flex", gap:8, background:"rgba(255,255,255,0.06)", border:`1px solid ${(!hasKey||remaining<=0)?C.red+"44":C.border}`, borderRadius:10, padding:"8px 12px", alignItems:"center" }}>
-            <span style={{ fontSize:12, color:C.cyan }}>ÃÂ¢ÃÂÃÂº</span>
+            <span style={{ fontSize:12, color:C.cyan }}>›</span>
             <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} disabled={!hasKey||remaining<=0}
               placeholder={!hasKey?"Add API key in Settings...":remaining>0?"Ask about your portfolio...":"Query limit reached"}
               style={{ flex:1, background:"none", border:"none", outline:"none", color:(hasKey&&remaining>0)?C.text:C.textDim, fontFamily:"'Space Mono',monospace", fontSize:12, cursor:(hasKey&&remaining>0)?"text":"not-allowed" }}/>
@@ -929,7 +1027,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ News Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── News Tab ─────────────────────────────────────────────────────────────────
     function NewsTab({ C, newsKey, finnhubKey, portfolio, onArticleCount }) {
       const [articles, setArticles] = useState([]);
       const [loading, setLoading]   = useState(false);
@@ -952,9 +1050,9 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       const fetchNews = async (category) => {
         setLoading(true); setError(""); setArticles([]);
 
-        // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Alpha Vantage skipped ÃÂ¢ÃÂÃÂ using Finnhub ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+        // ── Alpha Vantage skipped — using Finnhub ────────────────────────────
 
-        // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Finnhub fallback (free, no sentiment) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+        // ── Finnhub fallback (free, no sentiment) ─────────────────────────────
         try {
           const today = new Date().toISOString().slice(0,10);
           const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
@@ -1000,8 +1098,8 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       return (
         <div>
           <div style={{ display:"flex", gap:6, marginBottom:14, overflowX:"auto", paddingBottom:2 }}>
-            <button style={pill(filter==="general")} onClick={()=>setFilter("general")}>ÃÂ°ÃÂÃÂÃÂ Market</button>
-            <button style={pill(filter==="forex")} onClick={()=>setFilter("forex")}>ÃÂ°ÃÂÃÂÃÂ± Forex</button>
+            <button style={pill(filter==="general")} onClick={()=>setFilter("general")}>🌐 Market</button>
+            <button style={pill(filter==="forex")} onClick={()=>setFilter("forex")}>💱 Forex</button>
             {portfolioSymbols.map(sym => (
               <button key={sym} style={pill(filter===sym)} onClick={()=>setFilter(sym)}>{sym}</button>
             ))}
@@ -1009,7 +1107,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
           {!newsKey && !finnhubKey ? (
             <div style={{ textAlign:"center", padding:"50px 20px", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>ÃÂ°ÃÂÃÂÃÂ°</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>📰</div>
               <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:8 }}>No API keys connected</div>
               <div style={{ fontSize:11, color:C.textMuted, lineHeight:1.6, marginBottom:6 }}>
                 News is powered by <span style={{color:C.cyan}}>Finnhub</span>
@@ -1019,12 +1117,12 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             <>
               {source === "finnhub" && !newsKey && (
                 <div style={{ background:`${C.cyan}10`, border:`1px solid ${C.cyan}25`, borderRadius:10, padding:"8px 12px", marginBottom:10, fontSize:10, color:C.textMuted, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <span>Showing Finnhub news ÃÂÃÂ· <span style={{color:C.cyan}}>no sentiment data</span></span>
+                  <span>Showing Finnhub news · <span style={{color:C.cyan}}>no sentiment data</span></span>
                   <span style={{color:C.textDim}}>Add Alpha Vantage key for sentiment</span>
                 </div>
               )}
               {error && (
-                <div style={{ background:C.red+"18", border:`1px solid ${C.red}35`, borderRadius:12, padding:"12px 16px", fontSize:12, color:C.red, marginBottom:12 }}>ÃÂ¢ÃÂÃÂ  {error}</div>
+                <div style={{ background:C.red+"18", border:`1px solid ${C.red}35`, borderRadius:12, padding:"12px 16px", fontSize:12, color:C.red, marginBottom:12 }}>⚠ {error}</div>
               )}
               {loading && (
                 <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
@@ -1068,7 +1166,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         </div>
       );
     }
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Search Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Search Tab ───────────────────────────────────────────────────────────────
     // Popular stocks & crypto shown by default, Finnhub symbol search for queries
     const POPULAR_STOCKS = [
       { symbol:"AAPL",  name:"Apple Inc",           type:"stock",  sector:"Tech"       },
@@ -1132,7 +1230,17 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         await Promise.allSettled(items.map(async item => {
           try {
             const q = await fetchQuote(item.symbol, finnhubKey);
-            if (q.c > 0) fetched[item.symbol] = { price: q.c, change: q.dp || 0 };
+            if (q.c > 0) {
+              fetched[item.symbol] = { price: q.c, change: q.dp || 0, high: q.h || 0, low: q.l || 0, wHigh: q.h || 0, wLow: q.l || 0 };
+              try {
+                const m = await fetch('/api/finnhub?endpoint=metric&symbol=' + encodeURIComponent(item.symbol));
+                const md = await m.json();
+                if (md.metric) {
+                  fetched[item.symbol].wHigh = md.metric['52WeekHigh'] || q.h || 0;
+                  fetched[item.symbol].wLow  = md.metric['52WeekLow']  || q.l || 0;
+                }
+              } catch {}
+            }
           } catch {}
         }));
         return fetched;
@@ -1152,7 +1260,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         }
       }, [browseTab, finnhubKey]);
 
-      // Handle typing ÃÂ¢ÃÂÃÂ instant local filter + debounced Finnhub search
+      // Handle typing — instant local filter + debounced Finnhub search
       const handleQueryChange = (val) => {
         setQuery(val);
         setApiError("");
@@ -1247,9 +1355,9 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           if (data.s === "ok" && data.c?.length) {
             setPanelAvg(data.c[0]);
           } else {
-            // Candle not available (free tier) ÃÂ¢ÃÂÃÂ fall back to current price
+            // Candle not available (free tier) — fall back to current price
             setPanelAvg(prices[item.symbol]?.price || null);
-            setPanelError("Historical price unavailable on free tier ÃÂ¢ÃÂÃÂ using current price");
+            setPanelError("Historical price unavailable on free tier — using current price");
           }
         } catch {
           setPanelAvg(prices[item.symbol]?.price || null);
@@ -1309,15 +1417,15 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           {/* Search bar with dropdown */}
           <div style={{ position:"relative", marginBottom:12 }}>
             <div style={{ display:"flex", gap:10, background:C.bgCard, border:`1px solid ${showDropdown&&query?C.cyan+"88":C.borderBright}`, borderRadius: showDropdown&&query&&displayList.length?"14px 14px 0 0":"14px", padding:"11px 16px", alignItems:"center", backdropFilter:"blur(10px)", transition:"border-radius 0.15s, border-color 0.2s" }}>
-              <span style={{ fontSize:14, color:C.cyan }}>ÃÂ¢ÃÂÃÂ</span>
+              <span style={{ fontSize:14, color:C.cyan }}>⌕</span>
               <input value={query} onChange={e=>{ handleQueryChange(e.target.value); setShowDropdown(true); }}
                 onKeyDown={e=>{ if(e.key==="Enter"&&query.trim()){ setShowDropdown(false); doSearch(query.trim()); } if(e.key==="Escape"){ setShowDropdown(false); } }}
                 onFocus={()=>query&&setShowDropdown(true)}
                 onBlur={()=>setTimeout(()=>setShowDropdown(false), 150)}
-                placeholder="Search any stock or crypto ÃÂ¢ÃÂÃÂ e.g. Apple, BTC, NVDA..."
+                placeholder="Search any stock or crypto — e.g. Apple, BTC, NVDA..."
                 style={{ flex:1, background:"none", border:"none", outline:"none", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11 }}/>
               {loading && <Spinner color={C.cyan}/>}
-              {query && <button onClick={()=>{setQuery("");setApiError("");setShowDropdown(false);}} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", lineHeight:1 }}>ÃÂ¢ÃÂÃÂ</button>}
+              {query && <button onClick={()=>{setQuery("");setApiError("");setShowDropdown(false);}} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", lineHeight:1 }}>✕</button>}
             </div>
             {/* Dropdown autocomplete */}
             {showDropdown && query && displayList.length > 0 && (
@@ -1348,19 +1456,19 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           </div>
 
           {!finnhubKey && (
-            <div style={{ background:C.yellow+"22", border:`1px solid ${C.yellow}44`, borderRadius:6, padding:"7px 12px", marginBottom:10, fontSize:10, color:C.yellow }}>ÃÂ¢ÃÂÃÂ Add your Finnhub API key in Settings to see live prices and search all markets</div>
+            <div style={{ background:C.yellow+"22", border:`1px solid ${C.yellow}44`, borderRadius:6, padding:"7px 12px", marginBottom:10, fontSize:10, color:C.yellow }}>⚙ Add your Finnhub API key in Settings to see live prices and search all markets</div>
           )}
           {apiError && (
-            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red }}>ÃÂ¢ÃÂÃÂ  {apiError}</div>
+            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red }}>⚠ {apiError}</div>
           )}
 
           {/* Tab switcher + header */}
           <div style={{ display:"flex", gap:6, marginBottom:12, alignItems:"center" }}>
-            <button style={{ background:browseTab==="stocks"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="stocks"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="stocks"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("stocks");}}>ÃÂ°ÃÂÃÂÃÂ STOCKS</button>
-            <button style={{ background:browseTab==="crypto"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="crypto"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="crypto"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("crypto");}}>ÃÂ¢ÃÂÃÂ¿ CRYPTO</button>
+            <button style={{ background:browseTab==="stocks"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="stocks"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="stocks"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("stocks");}}>📈 STOCKS</button>
+            <button style={{ background:browseTab==="crypto"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="crypto"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="crypto"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("crypto");}}>₿ CRYPTO</button>
             {!isSearchMode && (
               <span style={{ fontSize:9, color:C.green, marginLeft:4, letterSpacing:"0.1em", display:"flex", alignItems:"center", gap:5 }}>
-                {loadingPrices ? <Spinner color={C.green}/> : "ÃÂ¢ÃÂÃÂ POPULAR"}
+                {loadingPrices ? <Spinner color={C.green}/> : "★ POPULAR"}
               </span>
             )}
             {isSearchMode && <span style={{ fontSize:9, color:C.textMuted }}>RESULTS FOR "{query}"</span>}
@@ -1404,27 +1512,31 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                         ) : (
                           <>
                             <div style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>${price<0.01?price.toFixed(6):price.toFixed(2)}</div>
-                            <div style={{ fontSize:10, color:change>=0?C.green:C.red }}>{change>=0?"ÃÂ¢ÃÂÃÂ²":"ÃÂ¢ÃÂÃÂ¼"} {Math.abs(change).toFixed(2)}%</div>
+                            <div style={{ fontSize:10, color:change>=0?C.green:C.red }}>{change>=0?"▲":"▼"} {Math.abs(change).toFixed(2)}%</div>
                           </>
                         )}
                       </div>
 
-                      {/* Watch button */}
-                      {(() => { const isW = (watchlist||[]).includes(item.symbol); return (
-                        <button onClick={()=>{ isW ? setWatchlist(p=>p.filter(s=>s!==item.symbol)) : setWatchlist(p=>[...p,item.symbol]); }}
-                          style={{ background:isW?'rgba(167,139,250,0.15)':'none', border:'1px solid '+(isW?'#a78bfa':'#1a2840'), borderRadius:8, padding:'6px 10px', color:isW?'#a78bfa':'#5a7090', fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:'pointer', transition:'all 0.2s', marginRight:6 }}>
-                          {isW ? 'ÃÂ°ÃÂÃÂÃÂ WATCHING' : 'ÃÂ°ÃÂÃÂÃÂ WATCH'}
-                        </button>
-                      ); })()}
-                      {/* Add button */}
-                      {isAdded ? (
-                        <div style={{ background:C.green+"22", border:`1px solid ${C.green}55`, borderRadius:8, padding:"6px 14px", color:C.green, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace" }}>ÃÂ¢ÃÂÃÂ ADDED</div>
-                      ) : (
-                        <button onClick={()=>openPanel(item)}
-                          style={{ background:isOpen?`${C.cyan}18`:`linear-gradient(135deg,${C.cyan}22,${C.purple}22)`, border:`1px solid ${isOpen?C.cyan:C.cyan+"55"}`, borderRadius:8, padding:"6px 14px", color:C.cyan, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:"pointer", transition:"all 0.2s" }}>
-                          {isOpen ? "ÃÂ¢ÃÂÃÂ CLOSE" : alreadyIn ? "+ ADD MORE" : "+ ADD"}
-                        </button>
-                      )}
+                      {/* Buttons */}
+                      <div style={{ display:"flex", gap:6 }}>
+                        {/* Watch button */}
+                        {(() => { const isWatched = watchlist?.includes(item.symbol); return (
+                          <button onClick={()=>{ if(isWatched){ setWatchlist(prev=>prev.filter(s=>s!==item.symbol)); } else { setWatchlist(prev=>[...prev, item.symbol]); }}}
+                            style={{ background:isWatched?`${C.purple}22`:"none", border:`1px solid ${isWatched?C.purple:C.border}`, borderRadius:8, padding:"6px 10px", color:isWatched?C.purple:C.textMuted, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:"pointer", transition:"all 0.2s" }}
+                            title={isWatched?"Remove from watchlist":"Add to watchlist"}>
+                            {isWatched ? "👁 WATCHING" : "👁 WATCH"}
+                          </button>
+                        ); })()}
+                        {/* Add button */}
+                        {isAdded ? (
+                          <div style={{ background:C.green+"22", border:`1px solid ${C.green}55`, borderRadius:8, padding:"6px 14px", color:C.green, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace" }}>✓ ADDED</div>
+                        ) : (
+                          <button onClick={()=>openPanel(item)}
+                            style={{ background:isOpen?`${C.cyan}18`:`linear-gradient(135deg,${C.cyan}22,${C.purple}22)`, border:`1px solid ${isOpen?C.cyan:C.cyan+"55"}`, borderRadius:8, padding:"6px 14px", color:C.cyan, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:"pointer", transition:"all 0.2s" }}>
+                            {isOpen ? "✕ CLOSE" : alreadyIn ? "+ ADD MORE" : "+ ADD"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1432,7 +1544,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                   {isOpen && (
                     <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${C.border}`, animation:"fadeIn 0.15s both" }}>
                       {panelError && (
-                        <div style={{ fontSize:9, color:C.yellow, marginBottom:8 }}>ÃÂ¢ÃÂÃÂ  {panelError}</div>
+                        <div style={{ fontSize:9, color:C.yellow, marginBottom:8 }}>⚠ {panelError}</div>
                       )}
                       <div style={{ display:"flex", gap:10, alignItems:"flex-end", flexWrap:"wrap" }}>
 
@@ -1463,7 +1575,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                         <div style={{ flex:"1 1 110px", minWidth:100 }}>
                           <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.1em", marginBottom:5 }}>PRICE ON DATE</div>
                           <div style={{ background:"rgba(255,255,255,0.03)", border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 10px", fontSize:11, fontFamily:"'Space Mono',monospace", color:panelAvg?C.green:C.textDim, minHeight:35, display:"flex", alignItems:"center" }}>
-                            {panelFetching ? <Spinner color={C.cyan}/> : panelAvg ? `$${panelAvg.toFixed(2)}` : "ÃÂ¢ÃÂÃÂ"}
+                            {panelFetching ? <Spinner color={C.cyan}/> : panelAvg ? `$${panelAvg.toFixed(2)}` : "—"}
                           </div>
                         </div>
 
@@ -1477,7 +1589,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                       {/* Cost preview */}
                       {panelShares && parseFloat(panelShares) > 0 && panelAvg && (
                         <div style={{ marginTop:8, fontSize:10, color:C.textMuted }}>
-                          {panelShares} ÃÂÃÂ ${panelAvg.toFixed(2)} = <span style={{ color:C.cyan, fontFamily:"'Space Mono',monospace", fontWeight:700 }}>${(parseFloat(panelShares)*panelAvg).toLocaleString(undefined,{maximumFractionDigits:2})}</span>
+                          {panelShares} × ${panelAvg.toFixed(2)} = <span style={{ color:C.cyan, fontFamily:"'Space Mono',monospace", fontWeight:700 }}>${(parseFloat(panelShares)*panelAvg).toLocaleString(undefined,{maximumFractionDigits:2})}</span>
                         </div>
                       )}
                     </div>
@@ -1493,13 +1605,13 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Alerts Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Alerts Tab ───────────────────────────────────────────────────────────────
     function AlertsTab({ C, finnhubKey, portfolio, onAlertCount, currentUser }) {
       const [quotes, setQuotes]     = useState({});
       const [loading, setLoading]   = useState(false);
       const [lastUpdated, setLastUpdated] = useState(null);
 
-      // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Price Alerts (Supabase) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+      // ── Price Alerts (Supabase) ───────────────────────────────────────────────
       const [priceAlerts, setPriceAlerts]   = useState([]);
       const [alertSymbol, setAlertSymbol]   = useState("");
       const [alertCond, setAlertCond]       = useState("above");
@@ -1528,7 +1640,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         });
         if (error) { setAlertMsg("Failed to save alert."); }
         else {
-          setAlertMsg("ÃÂ¢ÃÂÃÂ Alert saved! You'll get an email when it triggers.");
+          setAlertMsg("✓ Alert saved! You'll get an email when it triggers.");
           setAlertSymbol(""); setAlertPrice("");
           // Reload alerts
           const { data } = await _supabase.from("alerts").select("*").eq("user_id", currentUser.id).eq("triggered", false);
@@ -1581,119 +1693,119 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           const unrealizedPnL  = (price - avg) * h.shares;
           const key = (type) => `${h.symbol}_${type}_${today}`;
 
-          // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ 1. Big move up today (3%+) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+          // ── 1. Big move up today (3%+) ───────────────────────────────────────
           if (change >= 3) {
             const k = key("surge");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: change >= 6 ? "high" : "medium",
-              icon: change >= 6 ? "ÃÂ°ÃÂÃÂÃÂ" : "ÃÂ°ÃÂÃÂÃÂ",
+              icon: change >= 6 ? "🚀" : "📈",
               color: C.green,
               title: `${h.symbol} is surging today`,
-              body: `Up ${change.toFixed(1)}% today ÃÂ¢ÃÂÃÂ you're ${todayDollar >= 0 ? "gaining" : "losing"} $${Math.abs(todayDollar).toFixed(0)} on this position`,
+              body: `Up ${change.toFixed(1)}% today — you're ${todayDollar >= 0 ? "gaining" : "losing"} $${Math.abs(todayDollar).toFixed(0)} on this position`,
               signal: change >= 6 ? "SELL" : "HOLD",
-              signalNote: change >= 6 ? "Strong move ÃÂ¢ÃÂÃÂ consider taking some profit" : "Let it run, but watch for reversal",
+              signalNote: change >= 6 ? "Strong move — consider taking some profit" : "Let it run, but watch for reversal",
             });
           }
 
-          // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ 2. Big drop today (3%+) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+          // ── 2. Big drop today (3%+) ───────────────────────────────────────────
           if (change <= -3) {
             const k = key("drop");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: change <= -6 ? "high" : "medium",
-              icon: change <= -6 ? "ÃÂ°ÃÂÃÂÃÂ" : "ÃÂ°ÃÂÃÂÃÂ",
+              icon: change <= -6 ? "🆘" : "📉",
               color: C.red,
               title: `${h.symbol} is dropping today`,
-              body: `Down ${Math.abs(change).toFixed(1)}% today ÃÂ¢ÃÂÃÂ you're losing $${Math.abs(todayDollar).toFixed(0)} on this position today`,
+              body: `Down ${Math.abs(change).toFixed(1)}% today — you're losing $${Math.abs(todayDollar).toFixed(0)} on this position today`,
               signal: change <= -6 ? "SELL" : "HOLD",
-              signalNote: change <= -6 ? "Significant drop ÃÂ¢ÃÂÃÂ consider cutting losses" : "Short-term dip, hold unless fundamentals change",
+              signalNote: change <= -6 ? "Significant drop — consider cutting losses" : "Short-term dip, hold unless fundamentals change",
             });
           }
 
-          // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ 3. Deep in the red vs your buy price ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+          // ── 3. Deep in the red vs your buy price ─────────────────────────────
           if (gainFromAvg <= -10) {
             const k = key("deep_loss");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: gainFromAvg <= -20 ? "high" : "medium",
-              icon: "ÃÂ°ÃÂÃÂÃÂ»",
+              icon: "🔻",
               color: C.red,
               title: `${h.symbol} is well below your buy price`,
-              body: `Down ${Math.abs(gainFromAvg).toFixed(1)}% from your avg of $${avg.toFixed(2)} ÃÂÃÂ· unrealized loss: $${Math.abs(unrealizedPnL).toFixed(0)}`,
+              body: `Down ${Math.abs(gainFromAvg).toFixed(1)}% from your avg of $${avg.toFixed(2)} · unrealized loss: $${Math.abs(unrealizedPnL).toFixed(0)}`,
               signal: gainFromAvg <= -20 ? "SELL" : "HOLD",
               signalNote: gainFromAvg <= -20 ? "Consider cutting losses to protect capital" : "Evaluate if the thesis still holds",
             });
           } else if (gainFromAvg <= -3 && gainFromAvg > -10) {
-            // Mild dip below cost ÃÂ¢ÃÂÃÂ softer warning
+            // Mild dip below cost — softer warning
             const k = key("below_avg");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: "medium",
-              icon: "ÃÂ¢ÃÂÃÂ ÃÂ¯ÃÂ¸ÃÂ",
+              icon: "⚠️",
               color: C.yellow,
               title: `${h.symbol} slipped below your buy price`,
-              body: `Currently $${price.toFixed(2)} vs your avg of $${avg.toFixed(2)} ÃÂ¢ÃÂÃÂ you're down ${Math.abs(gainFromAvg).toFixed(1)}%`,
+              body: `Currently $${price.toFixed(2)} vs your avg of $${avg.toFixed(2)} — you're down ${Math.abs(gainFromAvg).toFixed(1)}%`,
               signal: "HOLD",
-              signalNote: "Minor dip ÃÂ¢ÃÂÃÂ watch closely before adding or selling",
+              signalNote: "Minor dip — watch closely before adding or selling",
             });
           }
 
-          // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ 4. Strong gain vs buy price ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+          // ── 4. Strong gain vs buy price ───────────────────────────────────────
           if (gainFromAvg >= 25) {
             const k = key("big_gain");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: gainFromAvg >= 50 ? "high" : "medium",
-              icon: "ÃÂ°ÃÂÃÂÃÂ°",
+              icon: "💰",
               color: C.green,
               title: `${h.symbol} up ${gainFromAvg.toFixed(0)}% from your buy`,
-              body: `Position is worth $${positionValue.toFixed(0)} ÃÂÃÂ· unrealized gain: +$${unrealizedPnL.toFixed(0)} since avg $${avg.toFixed(2)}`,
+              body: `Position is worth $${positionValue.toFixed(0)} · unrealized gain: +$${unrealizedPnL.toFixed(0)} since avg $${avg.toFixed(2)}`,
               signal: "SELL",
-              signalNote: gainFromAvg >= 50 ? "Exceptional gain ÃÂ¢ÃÂÃÂ strongly consider taking profit" : "Strong gain ÃÂ¢ÃÂÃÂ consider trimming your position",
+              signalNote: gainFromAvg >= 50 ? "Exceptional gain — strongly consider taking profit" : "Strong gain — consider trimming your position",
             });
           } else if (gainFromAvg >= 10) {
             const k = key("mod_gain");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: "medium",
-              icon: "ÃÂ¢ÃÂÃÂ¨",
+              icon: "✨",
               color: C.green,
               title: `${h.symbol} up ${gainFromAvg.toFixed(0)}% from your buy`,
-              body: `Sitting on +$${unrealizedPnL.toFixed(0)} gain ÃÂÃÂ· current price $${price.toFixed(2)} vs avg $${avg.toFixed(2)}`,
+              body: `Sitting on +$${unrealizedPnL.toFixed(0)} gain · current price $${price.toFixed(2)} vs avg $${avg.toFixed(2)}`,
               signal: "HOLD",
-              signalNote: "Good gain ÃÂ¢ÃÂÃÂ hold unless you need liquidity",
+              signalNote: "Good gain — hold unless you need liquidity",
             });
           }
 
-          // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ 5. Large dollar loss today (>$200 or >2% of position) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+          // ── 5. Large dollar loss today (>$200 or >2% of position) ────────────
           const pctTodayOfPosition = Math.abs(todayDollar) / positionValue * 100;
           if (todayDollar <= -200 || (todayDollar < 0 && pctTodayOfPosition >= 2)) {
             const k = key("dollar_loss_today");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: Math.abs(todayDollar) >= 500 ? "high" : "medium",
-              icon: "ÃÂ°ÃÂÃÂÃÂ¸",
+              icon: "💸",
               color: C.red,
               title: `${h.symbol} costing you today`,
-              body: `-$${Math.abs(todayDollar).toFixed(0)} on your ${h.shares} shares (${Math.abs(change).toFixed(1)}% move) ÃÂ¢ÃÂÃÂ bigger than typical daily swing`,
+              body: `-$${Math.abs(todayDollar).toFixed(0)} on your ${h.shares} shares (${Math.abs(change).toFixed(1)}% move) — bigger than typical daily swing`,
               signal: "HOLD",
-              signalNote: "Don't panic-sell ÃÂ¢ÃÂÃÂ assess if news-driven or just volatility",
+              signalNote: "Don't panic-sell — assess if news-driven or just volatility",
             });
           }
 
-          // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ 6. Approaching buy price from above (within 3%) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+          // ── 6. Approaching buy price from above (within 3%) ──────────────────
           if (gainFromAvg > 0 && gainFromAvg < 3) {
             const k = key("near_avg");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: "medium",
-              icon: "ÃÂ°ÃÂÃÂÃÂ¯",
+              icon: "🎯",
               color: C.yellow,
               title: `${h.symbol} nearing your buy price`,
-              body: `Only ${gainFromAvg.toFixed(1)}% above your avg of $${avg.toFixed(2)} ÃÂ¢ÃÂÃÂ if it drops further you'll be in the red`,
+              body: `Only ${gainFromAvg.toFixed(1)}% above your avg of $${avg.toFixed(2)} — if it drops further you'll be in the red`,
               signal: "HOLD",
-              signalNote: "Watch closely ÃÂ¢ÃÂÃÂ consider buying more if you're bullish",
+              signalNote: "Watch closely — consider buying more if you're bullish",
             });
           }
         });
@@ -1715,9 +1827,9 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
       return (
         <div>
-          {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Price Alert Creator ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+          {/* ── Price Alert Creator ─────────────────────────────────────────── */}
           <div style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:"18px 20px", marginBottom:20 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em", marginBottom:14 }}>ÃÂ°ÃÂÃÂÃÂ SET PRICE ALERT</div>
+            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em", marginBottom:14 }}>🔔 SET PRICE ALERT</div>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
               <input value={alertSymbol} onChange={e=>setAlertSymbol(e.target.value.toUpperCase())}
                 placeholder="Symbol (e.g. AAPL)"
@@ -1734,20 +1846,20 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                 {alertSaving ? "..." : "+ Add Alert"}
               </button>
             </div>
-            {alertMsg && <div style={{ marginTop:10, fontSize:11, color:alertMsg.startsWith("ÃÂ¢ÃÂÃÂ")?C.green:C.red }}>{alertMsg}</div>}
+            {alertMsg && <div style={{ marginTop:10, fontSize:11, color:alertMsg.startsWith("✓")?C.green:C.red }}>{alertMsg}</div>}
 
             {/* Active price alerts list */}
             {priceAlerts.length > 0 && (
               <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:6 }}>
-                <div style={{ fontSize:10, color:C.textMuted, letterSpacing:"0.08em", marginBottom:2 }}>ACTIVE ALERTS ÃÂ¢ÃÂÃÂ email: {currentUser?.email}</div>
+                <div style={{ fontSize:10, color:C.textMuted, letterSpacing:"0.08em", marginBottom:2 }}>ACTIVE ALERTS — email: {currentUser?.email}</div>
                 {priceAlerts.map(a => (
                   <div key={a.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 12px" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       <span style={{ fontWeight:700, color:C.cyan, fontFamily:"'DM Mono',monospace", fontSize:12 }}>{a.symbol}</span>
-                      <span style={{ color:C.textMuted, fontSize:11 }}>{a.condition === "above" ? "ÃÂ¢ÃÂÃÂ² rises above" : "ÃÂ¢ÃÂÃÂ¼ falls below"}</span>
+                      <span style={{ color:C.textMuted, fontSize:11 }}>{a.condition === "above" ? "▲ rises above" : "▼ falls below"}</span>
                       <span style={{ fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace", fontSize:12 }}>${Number(a.target_price).toFixed(2)}</span>
                     </div>
-                    <button onClick={()=>deletePriceAlert(a.id)} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", padding:"2px 6px", borderRadius:4 }}>ÃÂ¢ÃÂÃÂ</button>
+                    <button onClick={()=>deletePriceAlert(a.id)} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", padding:"2px 6px", borderRadius:4 }}>✕</button>
                   </div>
                 ))}
               </div>
@@ -1767,14 +1879,14 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
               {lastUpdated && <span style={{ fontSize:9, color:C.textDim }}>updated {lastUpdated.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span>}
               <button onClick={refresh} disabled={loading||!finnhubKey} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 12px", color:loading?C.textDim:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:loading?"not-allowed":"pointer" }}>
-                {loading ? "ÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·" : "ÃÂ¢ÃÂÃÂ» REFRESH"}
+                {loading ? "···" : "↻ REFRESH"}
               </button>
             </div>
           </div>
 
           {!finnhubKey && (
             <div style={{ textAlign:"center", padding:"50px 20px", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>ÃÂ°ÃÂÃÂÃÂ</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>🔔</div>
               <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:8 }}>No Finnhub key connected</div>
               <div style={{ fontSize:11, color:C.textMuted, lineHeight:1.6 }}>Add your Finnhub key in Settings to get<br/>automatic alerts based on market movement</div>
             </div>
@@ -1782,7 +1894,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
           {finnhubKey && !portfolio.length && (
             <div style={{ textAlign:"center", padding:"40px 0", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-              <div style={{ fontSize:28, marginBottom:10 }}>ÃÂ°ÃÂÃÂÃÂ</div>
+              <div style={{ fontSize:28, marginBottom:10 }}>📊</div>
               <div style={{ fontSize:12, color:C.textMuted }}>Add stocks to your portfolio to see alerts</div>
             </div>
           )}
@@ -1797,7 +1909,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             <>
               {alerts.length === 0 && (
                 <div style={{ textAlign:"center", padding:"40px 0", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-                  <div style={{ fontSize:28, marginBottom:8 }}>ÃÂ¢ÃÂÃÂ</div>
+                  <div style={{ fontSize:28, marginBottom:8 }}>✅</div>
                   <div style={{ fontSize:12, fontWeight:600, color:C.green, marginBottom:4 }}>All clear</div>
                   <div style={{ fontSize:10, color:C.textMuted }}>No notable market activity in your portfolio right now</div>
                 </div>
@@ -1819,7 +1931,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                           {quotes[a.symbol] && (
                             <div style={{ display:"flex", gap:6, alignItems:"center" }}>
                               <span style={{ fontSize:11, color:C.text, fontFamily:"'DM Mono',monospace", fontWeight:600 }}>${quotes[a.symbol].price.toFixed(2)}</span>
-                              <span style={{ fontSize:10, color:quotes[a.symbol].change>=0?C.green:C.red }}>{quotes[a.symbol].change>=0?"ÃÂ¢ÃÂÃÂ²":"ÃÂ¢ÃÂÃÂ¼"} {Math.abs(quotes[a.symbol].change).toFixed(2)}%</span>
+                              <span style={{ fontSize:10, color:quotes[a.symbol].change>=0?C.green:C.red }}>{quotes[a.symbol].change>=0?"▲":"▼"} {Math.abs(quotes[a.symbol].change).toFixed(2)}%</span>
                             </div>
                           )}
                           {a.signal && (
@@ -1838,7 +1950,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
               </div>
 
               <div style={{ marginTop:10, fontSize:9, color:C.textDim, textAlign:"center" }}>
-                Watching {portfolio.length} holding{portfolio.length!==1?"s":""} ÃÂÃÂ· alerts refresh on load and manually
+                Watching {portfolio.length} holding{portfolio.length!==1?"s":""} · alerts refresh on load and manually
               </div>
             </>
           )}
@@ -1846,7 +1958,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Section helper ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Section helper ───────────────────────────────────────────────────────────
     function Section({ label, children, C, last }) {
       return (
         <div style={{ marginBottom:last?0:16, paddingBottom:last?0:16, borderBottom:last?"none":`1px solid ${C.border}` }}>
@@ -1856,7 +1968,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Settings Panel ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── Settings Panel ───────────────────────────────────────────────────────────
     function SettingsPanel({ C, darkMode, setDarkMode, notifications, setNotifications, onClose, currentUser, onSignOut }) {
 
       return (
@@ -1864,10 +1976,10 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
           <div onClick={e=>e.stopPropagation()} style={{ marginTop:56, marginRight:14, width:320, background:darkMode?"#090e1c":"#ffffff", border:`1px solid ${C.border}`, borderRadius:12, padding:20, boxShadow:"0 20px 60px #00000088", animation:"slideIn 0.2s both", maxHeight:"calc(100vh - 80px)", overflowY:"auto" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
               <span style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.1em" }}>SETTINGS</span>
-              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer" }}>ÃÂ¢ÃÂÃÂ</button>
+              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer" }}>✕</button>
             </div>
 
-            {/* API Status ÃÂ¢ÃÂÃÂ server-side keys, no user input needed */}
+            {/* API Status — server-side keys, no user input needed */}
             <Section label="DATA SOURCES" C={C}>
               <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                 {[
@@ -1880,7 +1992,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                       <div style={{ fontSize:10, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>{label}</div>
                       <div style={{ fontSize:10, color:C.textMuted, marginTop:2 }}>{desc}</div>
                     </div>
-                    <span style={{ fontSize:10, color:color }}>ÃÂ¢ÃÂÃÂ Live</span>
+                    <span style={{ fontSize:10, color:color }}>● Live</span>
                   </div>
                 ))}
               </div>
@@ -1927,72 +2039,207 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Main App ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
-    
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Watchlist Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
-    function WatchlistTab({ C, finnhubKey, watchlist, setWatchlist }) {
-      const [quotes, setQuotes] = React.useState({});
-      const [loading, setLoading] = React.useState(false);
 
-      const refresh = async () => {
+    // ── Watchlist Tab ─────────────────────────────────────────────────────────────
+    function WatchlistTab({ C, finnhubKey, watchlist, setWatchlist }) {
+      const [quotes, setQuotes]       = useState({});
+      const [candles, setCandles]     = useState({});
+      const [loading, setLoading]     = useState(false);
+      const [search, setSearch]       = useState("");
+      const [suggestions, setSuggestions] = useState([]);
+      const [showSug, setShowSug]     = useState(false);
+      const debounceRef               = useRef(null);
+
+      // Fetch live prices + sparkline for all watchlist items
+      const refreshAll = async () => {
         if (!watchlist.length) return;
         setLoading(true);
-        const fetched = {};
+        const now = Math.floor(Date.now()/1000);
+        const from = now - 60*60*24*30;
         await Promise.allSettled(watchlist.map(async sym => {
           try {
-            const q = await fetchQuote(sym);
-            if (q.c > 0) fetched[sym] = { price: q.c, change: q.dp || 0, open: q.o || 0 };
+            const [q, cnd] = await Promise.all([
+              fetch(`/api/finnhub?endpoint=quote&symbol=${sym}`).then(r=>r.json()),
+              fetch(`/api/finnhub?endpoint=candle&symbol=${sym}&resolution=D&from=${from}&to=${now}`).then(r=>r.json()),
+            ]);
+            if (q.c) setQuotes(prev => ({ ...prev, [sym]: q }));
+            if (cnd.s === "ok") setCandles(prev => ({ ...prev, [sym]: cnd }));
           } catch {}
         }));
-        setQuotes(fetched);
         setLoading(false);
       };
 
-      React.useEffect(() => { refresh(); }, [watchlist.length]);
+      useEffect(() => { refreshAll(); }, [watchlist.length]);
+
+      // Search suggestions
+      const handleSearch = (val) => {
+        setSearch(val.toUpperCase());
+        clearTimeout(debounceRef.current);
+        if (!val.trim()) { setSuggestions([]); return; }
+        debounceRef.current = setTimeout(async () => {
+          try {
+            const r = await fetch(`/api/finnhub?endpoint=search&q=${encodeURIComponent(val)}`);
+            const d = await r.json();
+            setSuggestions((d.result||[]).filter(s=>s.type==="Common Stock"||s.type==="EQS").slice(0,6));
+            setShowSug(true);
+          } catch {}
+        }, 300);
+      };
+
+      const addToWatchlist = (sym) => {
+        if (!watchlist.includes(sym)) setWatchlist(prev => [...prev, sym]);
+        setSearch(""); setSuggestions([]); setShowSug(false);
+      };
+
+      const removeFromWatchlist = (sym) => {
+        setWatchlist(prev => prev.filter(s => s !== sym));
+        setQuotes(prev => { const n = {...prev}; delete n[sym]; return n; });
+        setCandles(prev => { const n = {...prev}; delete n[sym]; return n; });
+      };
+
+      // Mini sparkline SVG
+      const Sparkline = ({ data, color, width=120, height=40 }) => {
+        if (!data?.c?.length) return <div style={{ width, height, background:`${C.border}33`, borderRadius:4 }}/>;
+        const pts = data.c.slice(-30);
+        const min = Math.min(...pts), max = Math.max(...pts);
+        const range = max - min || 1;
+        const w = width, h = height, pad = 3;
+        const x = (i) => pad + (i/(pts.length-1)) * (w-2*pad);
+        const y = (v) => h - pad - ((v-min)/range)*(h-2*pad);
+        const path = pts.map((v,i) => `${i===0?"M":"L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+        const positive = pts[pts.length-1] >= pts[0];
+        const lineColor = positive ? C.green : C.red;
+        return (
+          <svg width={w} height={h} style={{ overflow:"visible" }}>
+            <defs>
+              <linearGradient id={`wg-${color}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={lineColor} stopOpacity="0.3"/>
+                <stop offset="100%" stopColor={lineColor} stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d={`${path} L${x(pts.length-1).toFixed(1)},${h} L${x(0).toFixed(1)},${h} Z`}
+              fill={`url(#wg-${color})`}/>
+            <path d={path} fill="none" stroke={lineColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      };
 
       return (
         <div>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:'0.08em' }}>WATCHLIST</div>
-            <button onClick={refresh} disabled={loading} style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'5px 12px', color:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:'pointer' }}>
-              {loading ? 'ÃÂÃÂ·ÃÂÃÂ·ÃÂÃÂ·' : 'ÃÂ¢ÃÂÃÂ» REFRESH'}
+          {/* Header */}
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+            <div>
+              <div style={{ fontSize:20, fontWeight:700, color:C.text }}>Watchlist</div>
+              <div style={{ fontSize:12, color:C.textMuted, marginTop:2 }}>Stocks you're eyeing — not buying yet</div>
+            </div>
+            <button onClick={refreshAll} disabled={loading} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, padding:"7px 14px", color:loading?C.textDim:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:loading?"not-allowed":"pointer" }}>
+              {loading ? "···" : "↻ REFRESH"}
             </button>
           </div>
-          {watchlist.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'60px 20px', color:C.textMuted }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>ÃÂ°ÃÂÃÂÃÂ</div>
-              <div style={{ fontSize:16, fontWeight:600, color:C.text, marginBottom:8 }}>Your watchlist is empty</div>
-              <div style={{ fontSize:12 }}>Go to Search and click ÃÂ°ÃÂÃÂÃÂ WATCH on any stock</div>
+
+          {/* Search to add */}
+          <div style={{ position:"relative", marginBottom:24 }}>
+            <div style={{ display:"flex", gap:10, background:C.bgCard, border:`1px solid ${C.cyan}55`, borderRadius:12, padding:"11px 16px", alignItems:"center" }}>
+              <span style={{ color:C.cyan, fontSize:14 }}>⌕</span>
+              <input value={search} onChange={e=>handleSearch(e.target.value)}
+                onFocus={()=>search&&setShowSug(true)}
+                onBlur={()=>setTimeout(()=>setShowSug(false),150)}
+                onKeyDown={e=>{ if(e.key==="Enter"&&search.trim()){ addToWatchlist(search.trim()); } }}
+                placeholder="Search to add a stock to watchlist..."
+                style={{ flex:1, background:"none", border:"none", outline:"none", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11 }}/>
             </div>
-          ) : (
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {showSug && suggestions.length > 0 && (
+              <div style={{ position:"absolute", top:"calc(100% + 4px)", left:0, right:0, zIndex:50, background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:10, overflow:"hidden", boxShadow:"0 8px 32px #00000066" }}>
+                {suggestions.map((s,i) => (
+                  <div key={i} onMouseDown={()=>addToWatchlist(s.symbol)}
+                    style={{ padding:"10px 16px", cursor:"pointer", borderBottom:i<suggestions.length-1?`1px solid ${C.border}`:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}
+                    onMouseEnter={e=>e.currentTarget.style.background=C.bgCardHover}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                    <div>
+                      <span style={{ fontWeight:700, color:C.cyan, fontFamily:"'DM Mono',monospace", fontSize:13 }}>{s.symbol}</span>
+                      <span style={{ color:C.textMuted, fontSize:11, marginLeft:10 }}>{s.description}</span>
+                    </div>
+                    <span style={{ color:C.cyan, fontSize:11 }}>+ Add</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Empty state */}
+          {watchlist.length === 0 && (
+            <div style={{ textAlign:"center", padding:"60px 20px", color:C.textMuted }}>
+              <div style={{ fontSize:40, marginBottom:16 }}>🔖</div>
+              <div style={{ fontSize:16, fontWeight:600, color:C.text, marginBottom:8 }}>Your watchlist is empty</div>
+              <div style={{ fontSize:13 }}>Search for stocks above to start tracking ones you're interested in</div>
+            </div>
+          )}
+
+          {/* Watchlist grid */}
+          {watchlist.length > 0 && (
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:16 }}>
               {watchlist.map(sym => {
                 const q = quotes[sym];
-                const isUp = q ? q.change >= 0 : true;
+                const cnd = candles[sym];
+                const price = q?.c;
+                const change = q?.dp;
+                const positive = (change||0) >= 0;
                 return (
-                  <div key={sym} style={{ background:C.bgCard, border:'1px solid '+C.border, borderRadius:12, padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-                      <div style={{ width:42, height:42, borderRadius:10, background:'linear-gradient(135deg,'+C.cyan+'22,'+C.purple+'22)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:11, color:C.cyan, fontFamily:"'Space Mono',monospace" }}>
+                  <div key={sym} style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:16, padding:"20px", position:"relative", transition:"border-color 0.2s" }}
+                    onMouseEnter={e=>e.currentTarget.style.borderColor=C.cyan+"44"}
+                    onMouseLeave={e=>e.currentTarget.style.borderColor=C.border}>
+                    {/* Remove button */}
+                    <button onClick={()=>removeFromWatchlist(sym)}
+                      style={{ position:"absolute", top:12, right:12, background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer", padding:"2px 6px", borderRadius:4, lineHeight:1 }}>✕</button>
+
+                    {/* Symbol + name */}
+                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+                      <div style={{ width:40, height:40, borderRadius:10, background:`linear-gradient(135deg,${C.cyan}22,${C.purple}22)`, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:11, color:C.cyan, fontFamily:"'Space Mono',monospace" }}>
                         {sym.slice(0,3)}
                       </div>
                       <div>
-                        <div style={{ fontWeight:700, color:C.text, fontSize:15, fontFamily:"'DM Mono',monospace" }}>{sym}</div>
-                        <div style={{ fontSize:11, color:C.textMuted, marginTop:2 }}>Watching</div>
+                        <div style={{ fontWeight:800, color:C.text, fontSize:15, fontFamily:"'DM Mono',monospace" }}>{sym}</div>
+                        <div style={{ fontSize:10, color:C.textMuted }}>Watchlist</div>
                       </div>
                     </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:16 }}>
-                      {q ? (
-                        <>
-                          <div style={{ textAlign:'right' }}>
-                            <div style={{ fontWeight:700, color:C.text, fontSize:16, fontFamily:"'DM Mono',monospace" }}>${q.price.toFixed(2)}</div>
-                            <div style={{ fontSize:11, color:isUp?C.green:C.red, marginTop:2 }}>{isUp?'ÃÂ¢ÃÂÃÂ²':'ÃÂ¢ÃÂÃÂ¼'} {Math.abs(q.change).toFixed(2)}%</div>
+
+                    {/* Sparkline */}
+                    <div style={{ marginBottom:12 }}>
+                      <Sparkline data={cnd} color={sym} width={240} height={60}/>
+                    </div>
+
+                    {/* Price + change */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end" }}>
+                      <div>
+                        <div style={{ fontSize:22, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>
+                          {price ? `$${price.toFixed(2)}` : <span style={{ color:C.textDim, fontSize:14 }}>Loading...</span>}
+                        </div>
+                        {change !== undefined && (
+                          <div style={{ fontSize:12, color:positive?C.green:C.red, marginTop:2 }}>
+                            {positive?"▲":"▼"} {Math.abs(change).toFixed(2)}% today
                           </div>
-                        </>
-                      ) : (
-                        <div style={{ color:C.textDim, fontSize:12 }}>Loading...</div>
-                      )}
-                      <button onClick={()=>setWatchlist(prev=>prev.filter(s=>s!==sym))}
-                        style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'6px 10px', color:C.textMuted, fontSize:11, cursor:'pointer' }}>ÃÂ¢ÃÂÃÂ</button>
+                        )}
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ display:"flex", gap:12, marginTop:4 }}>
+                          <div style={{ textAlign:"center" }}>
+                            <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.05em" }}>DAY H</div>
+                            <div style={{ fontSize:11, color:C.green, fontFamily:"'DM Mono',monospace" }}>{q?.high ? `$${q.high.toFixed(2)}` : "—"}</div>
+                          </div>
+                          <div style={{ textAlign:"center" }}>
+                            <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.05em" }}>DAY L</div>
+                            <div style={{ fontSize:11, color:C.red, fontFamily:"'DM Mono',monospace" }}>{q?.low ? `$${q.low.toFixed(2)}` : "—"}</div>
+                          </div>
+                          <div style={{ textAlign:"center" }}>
+                            <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.05em" }}>52W H</div>
+                            <div style={{ fontSize:11, color:C.green, fontFamily:"'DM Mono',monospace" }}>{q?.wHigh ? `$${q.wHigh.toFixed(2)}` : "—"}</div>
+                          </div>
+                          <div style={{ textAlign:"center" }}>
+                            <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.05em" }}>52W L</div>
+                            <div style={{ fontSize:11, color:C.red, fontFamily:"'DM Mono',monospace" }}>{q?.wLow ? `$${q.wLow.toFixed(2)}` : "—"}</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -2003,6 +2250,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
+    // ── Main App ─────────────────────────────────────────────────────────────────
     const TICKER_POOL = [
       {sym:"BINANCE:BTCUSDT", l:"BTC"},
       {sym:"BINANCE:ETHUSD",  l:"ETH"},
@@ -2026,7 +2274,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       {sym:"PLTR",  l:"PLTR"},
     ];
 
-    // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ COMPARE TAB ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+    // ── COMPARE TAB ─────────────────────────────────────────────────────────────
     function CompareTab({ C, finnhubKey, portfolio }) {
       const [symA, setSymA] = useState(portfolio[0]?.symbol || "");
       const [symB, setSymB] = useState(portfolio[1]?.symbol || "");
@@ -2140,14 +2388,14 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         return (
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, padding:"10px 0", borderBottom:`1px solid ${C.border}` }}>
             <div style={{ fontSize:11, color:C.textMuted, display:"flex", alignItems:"center" }}>{label}</div>
-            <div style={{ fontSize:13, fontWeight:600, color: aWins===true ? C.green : aWins===false ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valA) : valA ?? "ÃÂ¢ÃÂÃÂ"}</div>
-            <div style={{ fontSize:13, fontWeight:600, color: aWins===false ? C.green : aWins===true ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valB) : valB ?? "ÃÂ¢ÃÂÃÂ"}</div>
+            <div style={{ fontSize:13, fontWeight:600, color: aWins===true ? C.green : aWins===false ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valA) : valA ?? "—"}</div>
+            <div style={{ fontSize:13, fontWeight:600, color: aWins===false ? C.green : aWins===true ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valB) : valB ?? "—"}</div>
           </div>
         );
       }
 
-      const fmt$ = v => v != null ? `$${parseFloat(v).toFixed(2)}` : "ÃÂ¢ÃÂÃÂ";
-      const fmtPct = v => v != null ? `${parseFloat(v).toFixed(2)}%` : "ÃÂ¢ÃÂÃÂ";
+      const fmt$ = v => v != null ? `$${parseFloat(v).toFixed(2)}` : "—";
+      const fmtPct = v => v != null ? `${parseFloat(v).toFixed(2)}%` : "—";
 
       return (
         <div>
@@ -2217,7 +2465,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                     <div style={{ fontSize:22, fontWeight:800, color, fontFamily:"'Space Mono',monospace" }}>{d.symbol}</div>
                     <div style={{ fontSize:28, fontWeight:700, color:C.text, marginTop:4, fontFamily:"'DM Mono',monospace" }}>${d.c?.toFixed(2)}</div>
                     <div style={{ fontSize:13, color: d.dp >= 0 ? C.green : C.red, marginTop:4, fontWeight:600 }}>
-                      {d.dp >= 0 ? "ÃÂ¢ÃÂÃÂ²" : "ÃÂ¢ÃÂÃÂ¼"} {Math.abs(d.dp)?.toFixed(2)}% today
+                      {d.dp >= 0 ? "▲" : "▼"} {Math.abs(d.dp)?.toFixed(2)}% today
                     </div>
                     <div style={{ display:"flex", gap:16, marginTop:12 }}>
                       <div><div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.08em" }}>HIGH</div><div style={{ fontSize:12, color:C.text, fontFamily:"'DM Mono',monospace" }}>${d.h?.toFixed(2)}</div></div>
@@ -2289,14 +2537,14 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                 {normA.length > 0 && normB.length > 0 && (
                   <StatRow label="30-Day Return" valA={normA[normA.length-1]?.pct} valB={normB[normB.length-1]?.pct} format={fmtPct} higherIsBetter={true} />
                 )}
-                <div style={{ fontSize:10, color:C.textMuted, marginTop:12 }}>ÃÂ°ÃÂÃÂÃÂ¢ Green = better value for that metric</div>
+                <div style={{ fontSize:10, color:C.textMuted, marginTop:12 }}>🟢 Green = better value for that metric</div>
               </div>
             </>
           )}
 
           {!dataA && !dataB && !loading && (
             <div style={{ textAlign:"center", padding:"60px 0", color:C.textMuted }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>ÃÂ¢ÃÂÃÂÃÂ¯ÃÂ¸ÃÂ</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>⚖️</div>
               <div style={{ fontSize:14, fontWeight:600, color:C.text, marginBottom:6 }}>Compare any two stocks</div>
               <div style={{ fontSize:12 }}>Enter two ticker symbols above and hit Compare</div>
             </div>
@@ -2305,18 +2553,31 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       );
     }
 
-        // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Supabase client ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+        // ── Supabase client ──────────────────────────────────────────────────────
     const _supabase = window.supabase.createClient("https://vkrwxdtzolvecpfwhoir.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcnd4ZHR6b2x2ZWNwZndob2lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjYzOTgsImV4cCI6MjA4OTAwMjM5OH0.9yxfmKvvLDaFfLpsX5LYz2oRnTWT08oMmdSXiG8zjY8");
 
-        // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Auth Screen ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+        // ── Auth Screen ──────────────────────────────────────────────────────────
     function AuthScreen({ C, onAuth }) {
-      const [mode, setMode] = useState("signin");
+      const [mode, setMode] = useState("signin"); // signin | signup | reset
       const [email, setEmail] = useState("");
       const [password, setPassword] = useState("");
       const [name, setName] = useState("");
       const [error, setError] = useState("");
       const [loading, setLoading] = useState(false);
       const [verifyMsg, setVerifyMsg] = useState("");
+      const [resetMode, setResetMode] = useState(false);
+      const [resetSent, setResetSent] = useState(false);
+
+      const handleReset = async () => {
+        if (!email) return setError("Enter your email address.");
+        setLoading(true); setError("");
+        const { error: err } = await _supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: "https://www.stockrai.com",
+        });
+        if (err) setError(err.message);
+        else setResetSent(true);
+        setLoading(false);
+      };
 
       const handleSubmit = async () => {
         setError(""); setVerifyMsg("");
@@ -2325,6 +2586,16 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         if (password.length < 6) return setError("Password must be at least 6 characters.");
         setLoading(true);
         try {
+          if (mode === "reset") {
+            const { error: err } = await _supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: "https://www.stockrai.com"
+            });
+            if (err) throw err;
+            setVerifyMsg("Password reset email sent! Check your inbox.");
+            setMode("signin");
+            setLoading(false);
+            return;
+          }
           if (mode === "signup") {
             const { data, error: err } = await _supabase.auth.signUp({
               email, password,
@@ -2374,7 +2645,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
             {mode==="signup" && <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />}
             <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" style={inp} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
-            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" style={{...inp, marginBottom:error?8:20}} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />
+            {mode !== "reset" && <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" style={{...inp, marginBottom:error?8:20}} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} />}
 
             {error && <div style={{ color:C.red, fontSize:12, marginBottom:14 }}>{error}</div>}
 
@@ -2382,16 +2653,193 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
               style={{ width:"100%", padding:"12px 0", borderRadius:10, border:"none", cursor:loading?"not-allowed":"pointer",
                 background:`linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:14, fontWeight:700,
                 fontFamily:"'DM Sans',sans-serif", opacity:loading?0.7:1, transition:"opacity 0.2s" }}>
-              {loading?"...":(mode==="signin"?"Sign In":"Create Account")}
+              {loading?"...":(mode==="signin"?"Sign In":mode==="signup"?"Create Account":"Send Reset Email")}
             </button>
+
+            {mode==="signin" && !resetMode && (
+              <div style={{ textAlign:"center", marginTop:12 }}>
+                <span onClick={()=>{setResetMode(true);setError("");setVerifyMsg("");}}
+                  style={{ color:C.cyan, cursor:"pointer", fontSize:12 }}>Forgot password?</span>
+              </div>
+            )}
+
+            {resetMode && (
+              <div style={{ marginTop:16, padding:"16px", background:"rgba(255,255,255,0.03)", borderRadius:10, border:`1px solid ${C.border}` }}>
+                {resetSent ? (
+                  <div style={{ color:C.green, fontSize:12, textAlign:"center" }}>✓ Password reset email sent! Check your inbox.</div>
+                ) : (
+                  <>
+                    <div style={{ color:C.text, fontSize:13, marginBottom:10 }}>Enter your email to reset your password:</div>
+                    <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email"
+                      style={{ background:"rgba(255,255,255,0.06)", border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 14px", color:C.text, fontSize:13, fontFamily:"'DM Sans',sans-serif", outline:"none", width:"100%", boxSizing:"border-box", marginBottom:10 }}/>
+                    <button onClick={handleReset} disabled={loading}
+                      style={{ width:"100%", padding:"10px 0", borderRadius:8, border:"none", cursor:"pointer", background:`linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:13, fontWeight:700, fontFamily:"'DM Sans',sans-serif" }}>
+                      {loading ? "..." : "Send Reset Email"}
+                    </button>
+                  </>
+                )}
+                <div style={{ textAlign:"center", marginTop:10 }}>
+                  <span onClick={()=>{setResetMode(false);setResetSent(false);setError("");}} style={{ color:C.textMuted, cursor:"pointer", fontSize:12 }}>← Back to Sign In</span>
+                </div>
+              </div>
+            )}
 
             <div style={{ textAlign:"center", marginTop:20, color:C.textMuted, fontSize:12 }}>
               {mode==="signin"?"Don't have an account? ":"Already have an account? "}
-              <span onClick={()=>{setMode(mode==="signin"?"signup":"signin");setError("");setVerifyMsg("");}}
+              <span onClick={()=>{setMode(mode==="signin"?"signup":"signin");setError("");setVerifyMsg("");setResetMode(false);}}
                 style={{ color:C.cyan, cursor:"pointer", fontWeight:600 }}>
                 {mode==="signin"?"Sign Up":"Sign In"}
               </span>
             </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Stock Detail Panel ───────────────────────────────────────────────────────────
+    function StockDetailPanel({ C, symbol, holding, onClose }) {
+      const [quote, setQuote] = useState(null);
+      const [news, setNews] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        if (!symbol) return;
+        setLoading(true);
+        Promise.all([
+          fetch(`/api/finnhub?endpoint=quote&symbol=${symbol}`).then(r=>r.json()),
+          fetch(`/api/finnhub?endpoint=company-news&symbol=${symbol}&from=${new Date(Date.now()-7*86400000).toISOString().slice(0,10)}&to=${new Date().toISOString().slice(0,10)}`).then(r=>r.json()),
+        ]).then(([q, n]) => {
+          setQuote(q); setNews(Array.isArray(n) ? n.slice(0,5) : []); setLoading(false);
+        }).catch(() => setLoading(false));
+      }, [symbol]);
+
+      const gain = holding && quote?.c ? ((quote.c - holding.avg) / holding.avg * 100) : null;
+      const gainAbs = holding && quote?.c ? ((quote.c - holding.avg) * holding.shares) : null;
+
+      return (
+        <div style={{ position:"fixed", inset:0, zIndex:500, display:"flex", alignItems:"flex-end", justifyContent:"flex-end" }} onClick={onClose}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{ width:"min(480px,100vw)", height:"100vh", background:C.bgCard, borderLeft:`1px solid ${C.border}`, padding:"28px 24px", overflowY:"auto", animation:"slideIn 0.25s both" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+              <div>
+                <div style={{ fontSize:24, fontWeight:800, color:C.text, fontFamily:"'DM Mono',monospace" }}>{symbol}</div>
+                {holding && <div style={{ fontSize:12, color:C.textMuted }}>{holding.shares} shares · avg ${holding.avg?.toFixed(2)}</div>}
+              </div>
+              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:20, cursor:"pointer" }}>✕</button>
+            </div>
+            {loading ? <div style={{ color:C.textMuted, textAlign:"center", marginTop:60 }}>Loading...</div> : (
+              <>
+                {quote?.c > 0 && (
+                  <div style={{ background:C.bg, borderRadius:14, padding:"20px", marginBottom:16, border:`1px solid ${C.border}` }}>
+                    <div style={{ fontSize:36, fontWeight:800, color:C.text, fontFamily:"'DM Mono',monospace", marginBottom:4 }}>${quote.c?.toFixed(2)}</div>
+                    <div style={{ color:quote.dp>=0?C.green:C.red, fontSize:14, fontWeight:600 }}>{quote.dp>=0?"▲":"▼"} {Math.abs(quote.dp)?.toFixed(2)}% today</div>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginTop:16 }}>
+                      {[["Open","$"+quote.o?.toFixed(2)],["Prev Close","$"+quote.pc?.toFixed(2)],["High","$"+quote.h?.toFixed(2)],["Low","$"+quote.l?.toFixed(2)]].map(([l,v])=>(
+                        <div key={l} style={{ background:C.bgCard, borderRadius:8, padding:"10px 12px" }}>
+                          <div style={{ fontSize:10, color:C.textMuted, marginBottom:2 }}>{l}</div>
+                          <div style={{ fontSize:14, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {holding && gain !== null && (
+                  <div style={{ background:gain>=0?`${C.green}15`:`${C.red}15`, borderRadius:14, padding:"16px", marginBottom:16, border:`1px solid ${gain>=0?C.green+"44":C.red+"44"}` }}>
+                    <div style={{ fontSize:11, color:C.textMuted, marginBottom:6, letterSpacing:"0.08em" }}>YOUR POSITION</div>
+                    <div style={{ display:"flex", justifyContent:"space-between" }}>
+                      <div>
+                        <div style={{ fontSize:22, fontWeight:800, color:gain>=0?C.green:C.red }}>{gain>=0?"+":""}{gain?.toFixed(2)}%</div>
+                        <div style={{ fontSize:12, color:C.textMuted }}>vs avg ${holding.avg?.toFixed(2)}</div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontSize:18, fontWeight:700, color:C.text }}>${(holding.shares*quote.c)?.toFixed(0)}</div>
+                        <div style={{ fontSize:12, color:gain>=0?C.green:C.red }}>{gain>=0?"+":""}{gainAbs?.toFixed(0)} unrealized</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {news.length > 0 && (
+                  <div>
+                    <div style={{ fontSize:11, fontWeight:700, color:C.textMuted, letterSpacing:"0.08em", marginBottom:12 }}>RECENT NEWS</div>
+                    {news.map((a,i)=>(
+                      <a key={i} href={a.url||"#"} target="_blank" rel="noreferrer"
+                        style={{ display:"block", background:C.bg, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", marginBottom:8, textDecoration:"none" }}>
+                        <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:4, lineHeight:1.4 }}>{a.headline}</div>
+                        <div style={{ fontSize:11, color:C.textMuted }}>{a.source} · {a.datetime?new Date(a.datetime*1000).toLocaleDateString():""}</div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Onboarding ───────────────────────────────────────────────────────────────
+    function OnboardingModal({ C, onDone, setTab }) {
+      const [step, setStep] = useState(0);
+      const steps = [
+        { icon:"📈", title:"Welcome to Stockr AI", body:"Your personal portfolio intelligence platform. Let's get you set up in 3 quick steps.", btn:"Get Started" },
+        { icon:"🔍", title:"Search & Add Stocks", body:"Go to the Search tab to find any stock or crypto. Click + ADD to add it to your portfolio with your buy price and shares.", btn:"Got it" },
+        { icon:"🤖", title:"Ask Your AI Advisor", body:"Once you have stocks, your AI Advisor will analyze your portfolio in real-time and give you personalized insights.", btn:"Got it" },
+        { icon:"🔔", title:"Set Price Alerts", body:"Go to Alerts to set price targets. We'll email you at " + "your account email" + " when any stock hits your target.", btn:"Let's Go!" },
+      ];
+      const s = steps[step];
+      return (
+        <div style={{ position:"fixed", inset:0, zIndex:999, background:"rgba(0,0,0,0.7)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'DM Sans',sans-serif" }}>
+          <div style={{ width:380, background:C.bgCard, borderRadius:20, border:`1px solid ${C.border}`, padding:"36px 32px", textAlign:"center", animation:"fadeIn 0.3s both" }}>
+            <div style={{ fontSize:48, marginBottom:16 }}>{s.icon}</div>
+            <div style={{ fontSize:20, fontWeight:800, color:C.text, marginBottom:12 }}>{s.title}</div>
+            <div style={{ fontSize:14, color:C.textMuted, lineHeight:1.6, marginBottom:28 }}>{s.body}</div>
+            <div style={{ display:"flex", gap:6, justifyContent:"center", marginBottom:24 }}>
+              {steps.map((_,i) => <div key={i} style={{ width:i===step?20:6, height:6, borderRadius:3, background:i===step?C.cyan:C.border, transition:"all 0.3s" }}/>)}
+            </div>
+            <button onClick={()=>{ if(step < steps.length-1) setStep(s=>s+1); else { onDone(); setTab("search"); } }}
+              style={{ width:"100%", padding:"13px 0", borderRadius:10, border:"none", cursor:"pointer",
+                background:`linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:15, fontWeight:700, fontFamily:"'DM Sans',sans-serif" }}>
+              {s.btn}
+            </button>
+            {step > 0 && <div onClick={onDone} style={{ color:C.textMuted, fontSize:12, marginTop:14, cursor:"pointer" }}>Skip</div>}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Onboarding ───────────────────────────────────────────────────────────────
+    function OnboardingScreen({ C, onDone, currentUser }) {
+      const [step, setStep] = useState(0);
+      const steps = [
+        { icon:"📈", title:"Welcome to Stockr AI", body:"Your personal portfolio intelligence platform. Track stocks, get AI insights, and set price alerts — all in one place.", btn:"Get Started" },
+        { icon:"🔍", title:"Add Your First Stock", body:"Use the Search tab to find stocks and add them to your portfolio. We'll track live prices and your gains automatically.", btn:"Got it" },
+        { icon:"🤖", title:"Ask the AI Advisor", body:"Ask anything about your portfolio — "What's my biggest risk?" or "Should I rebalance?" — and get smart, personalized answers.", btn:"Got it" },
+        { icon:"🔔", title:"Set Price Alerts", body:"Go to the Alerts tab to set price targets. When a stock hits your target, we'll email you at " + (currentUser?.email || "your email") + ".", btn:"Let's Go!" },
+      ];
+      const s = steps[step];
+      return (
+        <div style={{ minHeight:"100vh", background:C.bg, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'DM Sans',sans-serif", padding:20 }}>
+          <div style={{ width:400, textAlign:"center" }}>
+            {/* Progress dots */}
+            <div style={{ display:"flex", justifyContent:"center", gap:6, marginBottom:32 }}>
+              {steps.map((_,i) => (
+                <div key={i} style={{ width: i===step?20:6, height:6, borderRadius:3, background:i===step?C.cyan:C.border, transition:"all 0.3s" }}/>
+              ))}
+            </div>
+            <div style={{ fontSize:56, marginBottom:20 }}>{s.icon}</div>
+            <div style={{ fontSize:22, fontWeight:800, color:C.text, marginBottom:12 }}>{s.title}</div>
+            <div style={{ fontSize:14, color:C.textMuted, lineHeight:1.7, marginBottom:36 }}>{s.body}</div>
+            <button onClick={()=>step < steps.length-1 ? setStep(s=>s+1) : onDone()}
+              style={{ width:"100%", padding:"14px 0", borderRadius:12, border:"none", cursor:"pointer",
+                background:`linear-gradient(135deg,${C.purple},${C.cyan})`, color:"#fff", fontSize:15, fontWeight:700,
+                fontFamily:"'DM Sans',sans-serif" }}>
+              {s.btn}
+            </button>
+            {step > 0 && (
+              <button onClick={onDone} style={{ background:"none", border:"none", color:C.textMuted, fontSize:12, cursor:"pointer", marginTop:16 }}>
+                Skip
+              </button>
+            )}
           </div>
         </div>
       );
@@ -2405,8 +2853,9 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       const [showSettings, setShowSettings]   = useState(false);
       const [isLoggedIn, setIsLoggedIn]       = useState(false);
       const [aiUsed, setAiUsed]               = useState(0);
-      const [watchlist, setWatchlist]         = useState(() => { try { const s = localStorage.getItem("stocker_watchlist"); return s ? JSON.parse(s) : []; } catch { return []; } });
       const [currentUser, setCurrentUser]     = useState(null);
+      const [showOnboarding, setShowOnboarding] = useState(false);
+      const [selectedStock, setSelectedStock]   = useState(null);
       const [authLoading, setAuthLoading]     = useState(true);
 
       // Restore Supabase session on load
@@ -2429,7 +2878,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         return () => subscription.unsubscribe();
       }, []);
 
-      // API keys ÃÂ¢ÃÂÃÂ entered via Settings, persisted to localStorage
+      // API keys — entered via Settings, persisted to localStorage
       const [anthropicKey, setAnthropicKey]   = useState("server");
       const [finnhubKey, setFinnhubKey]       = useState("server");
       const [newsKey, setNewsKey]             = useState("server");
@@ -2438,24 +2887,42 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       useEffect(() => { try { localStorage.setItem("stocker_finnhub_key", finnhubKey); } catch {} }, [finnhubKey]);
       useEffect(() => { try { localStorage.setItem("stocker_news_key", newsKey); } catch {} }, [newsKey]);
 
-      // Portfolio ÃÂ¢ÃÂÃÂ loaded from Supabase, persisted on change
-      const [portfolio, setPortfolio] = useState([]);
-      const [portfolioLoaded, setPortfolioLoaded] = useState(false);
+      // Portfolio — loaded from Supabase, persisted on change
+      // Load from localStorage immediately (instant, no async delay)
+      const [portfolio, setPortfolio] = useState(() => {
+        try {
+          // Try to get user id from session
+          const session = JSON.parse(localStorage.getItem("sb-vkrwxdtzolvecpfwhoir-auth-token") || "null");
+          const uid = session?.user?.id;
+          if (uid) {
+            const saved = localStorage.getItem("stocker_portfolio_" + uid);
+            if (saved) return JSON.parse(saved);
+          }
+          // Fallback to generic key
+          const saved = localStorage.getItem("stocker_portfolio");
+          if (saved) return JSON.parse(saved);
+        } catch {}
+        return [];
+      });
 
-      // Load portfolio from Supabase when user logs in
+      // Sync from Supabase when user session loads (background, non-blocking)
       useEffect(() => {
         if (!currentUser?.id) return;
         _supabase.from("portfolios").select("holdings").eq("user_id", currentUser.id).single()
-          .then(({ data }) => { if (data?.holdings && data.holdings.length > 0) setPortfolio(data.holdings); setPortfolioLoaded(true); }).catch(() => setPortfolioLoaded(true));
+          .then(({ data }) => {
+            if (data?.holdings && data.holdings.length > 0) {
+              // Only update if Supabase has more stocks than localStorage
+              setPortfolio(prev => data.holdings.length >= prev.length ? data.holdings : prev);
+            }
+          }).catch(() => {});
       }, [currentUser?.id]);
 
-      // Save portfolio to Supabase on every change
+      // Save to localStorage immediately + Supabase in background
       useEffect(() => {
         if (!currentUser?.id) return;
-        if (portfolio.length === 0 && !portfolioLoaded) return; // don't overwrite with empty on initial load
-        _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
         try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
-      }, [portfolio]); // portfolioLoaded guard above prevents empty save
+        _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      }, [portfolio]);
 
       // Persist API keys
       const [_keysLoaded] = useState(() => {
@@ -2474,9 +2941,32 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
       const [tickerItems, setTickerItems] = useState([]);
       const [newsCount, setNewsCount]     = useState(0);
+      const [watchlist, setWatchlist]     = useState(() => {
+        try { const s = localStorage.getItem("stocker_watchlist"); return s ? JSON.parse(s) : []; } catch { return []; }
+      });
+      useEffect(() => { try { localStorage.setItem("stocker_watchlist", JSON.stringify(watchlist)); } catch {} }, [watchlist]);
       const [alertCount, setAlertCount]   = useState(0);
 
       const C = darkMode ? DARK : LIGHT;
+
+      // Inject mobile CSS
+      useEffect(() => {
+        const style = document.createElement('style');
+        style.id = 'stockr-mobile-css';
+        style.textContent = `
+          @media (max-width: 768px) {
+            aside { display: none !important; }
+            .main-content { margin-left: 0 !important; padding: 12px !important; max-width: 100vw !important; padding-bottom: 80px !important; }
+            .stockr-ticker-center { display: none !important; }
+            .mobile-bottom-nav { display: flex !important; }
+          }
+          @media (min-width: 769px) {
+            .mobile-bottom-nav { display: none !important; }
+          }
+        `;
+        if (!document.getElementById('stockr-mobile-css')) document.head.appendChild(style);
+        return () => {};
+      }, []);
 
       // Clock
       useEffect(() => {
@@ -2513,7 +3003,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
       useEffect(() => { fetchLivePrices(); }, [fetchLivePrices]);
 
-      // Dedicated ticker fetch ÃÂ¢ÃÂÃÂ random picks, refreshes every 90 seconds
+      // Dedicated ticker fetch — random picks, refreshes every 90 seconds
       const fetchTicker = useCallback(async () => {
         if (!finnhubKey) return;
         try {
@@ -2558,8 +3048,8 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
         { id:"news",      label:"News",       icon:"M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z", badge: newsCount||null },
         { id:"search",    label:"Search",     icon:"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
         { id:"alerts",    label:"Alerts",     icon:"M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9", badge: alertCount||null },
-        { id:"watchlist", label:"Watchlist", icon:"M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" },
         { id:"compare",   label:"Compare",    icon:"M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
+        { id:"watchlist", label:"Watchlist",  icon:"M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" },
       ];
 
       // Auth gate
@@ -2570,7 +3060,15 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
       }
 
       if (!currentUser) {
-        return <AuthScreen C={C} onAuth={(user) => setCurrentUser(user)} />;
+        return <AuthScreen C={C} onAuth={(user) => {
+          setCurrentUser(user);
+          // Show onboarding for brand new users (no portfolio)
+          const key = "stockr_onboarded_" + user.id;
+          if (!localStorage.getItem(key)) {
+            setShowOnboarding(true);
+            localStorage.setItem(key, "1");
+          }
+        }} />;
       }
 
       const handleSignOut = async () => {
@@ -2581,6 +3079,12 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
 
       return (
         <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"'DM Sans',sans-serif", color:C.text, transition:"background 0.4s, color 0.4s" }}>
+
+          {/* Onboarding */}
+          {showOnboarding && <OnboardingModal C={C} onDone={()=>setShowOnboarding(false)} setTab={setTab} />}
+
+          {/* Stock Detail */}
+          {selectedStock && <StockDetailPanel C={C} symbol={selectedStock.symbol} holding={selectedStock.holding} onClose={()=>setSelectedStock(null)} />}
 
           {/* Ambient background */}
           <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
@@ -2593,10 +3097,10 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             <SettingsPanel C={C} darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} setNotifications={setNotifications} onClose={()=>setShowSettings(false)} currentUser={currentUser} onSignOut={handleSignOut}/>
           )}
 
-          {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ TOP NAVBAR ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+          {/* ── TOP NAVBAR ── */}
           <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, height:60, borderBottom:`1px solid ${C.border}`, background:darkMode ? "rgba(4,6,15,0.96)" : "rgba(255,255,255,0.97)", backdropFilter:"blur(20px)", display:"flex", alignItems:"stretch" }}>
 
-            {/* Logo zone ÃÂ¢ÃÂÃÂ hardcoded bg so ticker can NEVER bleed over it */}
+            {/* Logo zone — hardcoded bg so ticker can NEVER bleed over it */}
             <div style={{ width:220, flexShrink:0, display:"flex", alignItems:"center", paddingLeft:24, position:"relative", zIndex:999, backgroundColor:darkMode?"#04060f":"#ffffff" }}>
               <div style={{ display:"flex", alignItems:"baseline", gap:4, fontFamily:"'DM Mono',monospace", fontWeight:700, letterSpacing:"0.16em" }}>
                 <span style={{ fontSize:20, color:C.cyan }}>STOCKR</span>
@@ -2604,18 +3108,18 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
               </div>
             </div>
 
-            {/* Spacer ÃÂ¢ÃÂÃÂ pushes right controls to far right */}
+            {/* Spacer — pushes right controls to far right */}
             <div style={{ flex:1 }}/>
 
-            {/* Right controls ÃÂ¢ÃÂÃÂ pinned to far right */}
+            {/* Right controls — pinned to far right */}
             <div style={{ flexShrink:0, display:"flex", alignItems:"center", gap:10, paddingRight:20, paddingLeft:16, borderLeft:`1px solid ${C.border}` }}>
               <div style={{ textAlign:"right" }}>
                 <div style={{ fontSize:15, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>${totalValue.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
-                <div style={{ fontSize:10, color:dayGain>=0?C.green:C.red }}>{dayGain>=0?"ÃÂ¢ÃÂÃÂ²":"ÃÂ¢ÃÂÃÂ¼"} ${Math.abs(dayGain).toFixed(2)}</div>
+                <div style={{ fontSize:10, color:dayGain>=0?C.green:C.red }}>{dayGain>=0?"▲":"▼"} ${Math.abs(dayGain).toFixed(2)}</div>
               </div>
               <div style={{ width:1, height:28, background:C.border }}/>
               <button onClick={()=>setDarkMode(d=>!d)} title={darkMode?"Light mode":"Dark mode"} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.textMuted, transition:"all 0.2s", fontSize:14 }}>
-                {darkMode ? "ÃÂ¢ÃÂÃÂ" : "ÃÂ°ÃÂÃÂÃÂ"}
+                {darkMode ? "☀" : "🌙"}
               </button>
               <button onClick={()=>setShowSettings(s=>!s)} title="Settings" style={{ background:showSettings?`${C.cyan}20`:"none", border:`1px solid ${showSettings?C.cyan+"60":C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", transition:"all 0.2s" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={showSettings?C.cyan:C.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2625,10 +3129,10 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             </div>
           </nav>
 
-          {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ TICKER BAR ÃÂ¢ÃÂÃÂ below navbar, full width, isolated ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+          {/* ── TICKER BAR — below navbar, full width, isolated ── */}
           <div style={{ position:"fixed", top:60, left:0, right:0, zIndex:99, height:36, borderBottom:`1px solid ${C.border}`, backgroundColor:darkMode?"#04060f":"#ffffff", overflow:"hidden", display:"flex", alignItems:"center" }}>
             {(() => {
-              const placeholders = !finnhubKey ? TICKER_POOL.slice(0,12).map(p => ({ ...p, v:"ÃÂ¢ÃÂÃÂ", c:"ÃÂ¢ÃÂÃÂ" })) : [];
+              const placeholders = !finnhubKey ? TICKER_POOL.slice(0,12).map(p => ({ ...p, v:"—", c:"—" })) : [];
               const display = tickerItems.length ? tickerItems : placeholders;
               return (
                 <div style={{ display:"flex", gap:0, animation: display.length ? "tickerScroll 40s linear infinite" : "none", width:"max-content", flexShrink:0 }}>
@@ -2636,7 +3140,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                     <div key={i} style={{ flexShrink:0, padding:"0 24px", display:"flex", gap:10, alignItems:"center", borderRight:`1px solid ${C.border}` }}>
                       <span style={{ fontSize:10, color:C.textMuted, fontWeight:600, fontFamily:"'DM Mono',monospace", letterSpacing:"0.05em" }}>{m.l}</span>
                       <span style={{ fontSize:11, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>{m.v}</span>
-                      <span style={{ fontSize:10, fontWeight:600, color:!m.c||m.c==="ÃÂ¢ÃÂÃÂ"?C.textMuted:m.c.startsWith("+")?C.green:C.red }}>{m.c||"ÃÂ¢ÃÂÃÂ"}</span>
+                      <span style={{ fontSize:10, fontWeight:600, color:!m.c||m.c==="—"?C.textMuted:m.c.startsWith("+")?C.green:C.red }}>{m.c||"—"}</span>
                     </div>
                   ))}
                 </div>
@@ -2644,10 +3148,10 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
             })()}
           </div>
 
-          {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ MAIN BODY (below navbar + ticker) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+          {/* ── MAIN BODY (below navbar + ticker) ── */}
           <div style={{ display:"flex", paddingTop:96, minHeight:"100vh", position:"relative", zIndex:1 }}>
 
-            {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ LEFT SIDEBAR ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+            {/* ── LEFT SIDEBAR ── */}
             <aside style={{ width:220, flexShrink:0, position:"fixed", top:96, bottom:0, left:0, borderRight:`1px solid ${C.border}`, background:darkMode ? "rgba(4,6,15,0.98)" : "rgba(255,255,255,0.98)", backdropFilter:"blur(10px)", display:"flex", flexDirection:"column", padding:"24px 12px", overflowY:"auto" }}>
 
               {/* Portfolio summary card */}
@@ -2655,7 +3159,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
                 <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${C.cyan},${C.purple})` }}/>
                 <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.12em", marginBottom:6 }}>TOTAL VALUE</div>
                 <div style={{ fontSize:22, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace", letterSpacing:"-0.02em" }}>${totalValue.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
-                <div style={{ fontSize:11, color:dayGain>=0?C.green:C.red, marginTop:4 }}>{dayGain>=0?"ÃÂ¢ÃÂÃÂ²":"ÃÂ¢ÃÂÃÂ¼"} ${Math.abs(dayGain).toFixed(2)} today</div>
+                <div style={{ fontSize:11, color:dayGain>=0?C.green:C.red, marginTop:4 }}>{dayGain>=0?"▲":"▼"} ${Math.abs(dayGain).toFixed(2)} today</div>
                 <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${C.border}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", fontSize:10 }}>
                     <span style={{ color:C.textMuted }}>Holdings</span>
@@ -2687,7 +3191,7 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
               </div>
             </aside>
 
-            {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ MOBILE BOTTOM NAV ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+            {/* ── MOBILE BOTTOM NAV ── */}
             <div className="mobile-bottom-nav" style={{ display:"none", position:"fixed", bottom:0, left:0, right:0, zIndex:200, background:darkMode?"rgba(4,6,15,0.97)":"rgba(255,255,255,0.97)", backdropFilter:"blur(20px)", borderTop:`1px solid ${C.border}`, padding:"6px 4px", paddingBottom:"calc(6px + env(safe-area-inset-bottom))" }}>
               {NAV_ITEMS.map(item => (
                 <button key={item.id} onClick={()=>setTab(item.id)}
@@ -2703,16 +3207,16 @@ Use this data actively ÃÂ¢ÃÂÃÂ synthesize it into insight rathe
               ))}
             </div>
 
-            {/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ MAIN CONTENT ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */}
+            {/* ── MAIN CONTENT ── */}
             <main style={{ flex:1, marginLeft:"clamp(0px, 220px, 220px)", padding:"32px 40px", minHeight:"calc(100vh - 60px)", maxWidth:"calc(100vw - 220px)" }} className="main-content">
               <div key={tab} style={{ animation:"fadeIn 0.2s both", maxWidth:1100 }}>
-                {tab==="portfolio" && <PortfolioTab C={C} portfolio={portfolio} setPortfolio={setPortfolio} loadingPrices={loadingPrices} priceError={priceError} onRefresh={fetchLivePrices} finnhubKey={finnhubKey}/>}
+                {tab==="portfolio" && <PortfolioTab C={C} portfolio={portfolio} setPortfolio={setPortfolio} loadingPrices={loadingPrices} priceError={priceError} onRefresh={fetchLivePrices} finnhubKey={finnhubKey} onStockClick={(sym, h)=>setSelectedStock({symbol:sym, holding:h})}/>}
                 {tab==="advisor"   && <AIAdvisorTab C={C} aiUsed={aiUsed} setAiUsed={setAiUsed} anthropicKey={anthropicKey} portfolio={portfolio}/>}
                 {tab==="news"      && <NewsTab C={C} newsKey={newsKey} finnhubKey={finnhubKey} portfolio={portfolio} onArticleCount={setNewsCount}/>}
                 {tab==="search"    && <SearchTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} setPortfolio={setPortfolio} watchlist={watchlist} setWatchlist={setWatchlist}/>}
                 {tab==="alerts"    && <AlertsTab C={C} finnhubKey={finnhubKey} portfolio={portfolio} onAlertCount={setAlertCount} currentUser={currentUser}/>}
-                {tab==="watchlist" && <WatchlistTab C={C} finnhubKey={finnhubKey} watchlist={watchlist} setWatchlist={setWatchlist}/>}
                 {tab==="compare"   && <CompareTab C={C} finnhubKey={finnhubKey} portfolio={portfolio}/>}
+                {tab==="watchlist" && <WatchlistTab C={C} finnhubKey={finnhubKey} watchlist={watchlist} setWatchlist={setWatchlist}/>}
               </div>
             </main>
           </div>
