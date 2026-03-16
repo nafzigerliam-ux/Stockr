@@ -2890,6 +2890,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       // Portfolio — loaded from Supabase, persisted on change
       const [portfolio, setPortfolio] = useState([]);
       const [portfolioLoaded, setPortfolioLoaded] = useState(false);
+      const [portfolioLoaded, setPortfolioLoaded] = useState(false);
 
       // Load portfolio from Supabase when user logs in
       useEffect(() => {
