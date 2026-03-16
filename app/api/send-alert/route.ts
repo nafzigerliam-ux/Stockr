@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         </div>
       </div>
       <a href="https://www.stockrai.com" style="display:block;text-align:center;background:linear-gradient(135deg,#6d28d9,#38bdf8);color:#fff;text-decoration:none;padding:14px;border-radius:10px;font-weight:700;font-size:14px;letter-spacing:0.5px;">
-        View Portfolio →
+        View Portfolio â
       </a>
     </div>
     <div style="padding:16px 32px;border-top:1px solid #1a2840;text-align:center;">
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         from: "Stockr AI <alerts@stockrai.com>",
         to: [to],
-        subject: `🔔 ${symbol} Alert — Price ${condition === "above" ? "▲" : "▼"} $${Number(currentPrice).toFixed(2)}`,
+        subject: `ð ${symbol} Alert â Price ${condition === "above" ? "â²" : "â¼"} $${Number(currentPrice).toFixed(2)}`,
         html,
       }),
     });
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Resend error");
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
