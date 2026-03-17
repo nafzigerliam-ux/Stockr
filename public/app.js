@@ -327,7 +327,7 @@ const { useState, useEffect, useRef, useCallback } = React;
               ))}
               {data.map((d,i) => {
                 const x = toX(i);
-                const candleW = Math.max(2, Math.min(8, (W-PAD*2)/data.length*0.6));
+                const candleW = Math.max(2, (W-PAD*2)/data.length*0.8);
                 const open  = i===0 ? d.val*0.998 : data[i-1].val;
                 const close = d.val;
                 const high  = Math.max(open, close) * 1.002;
