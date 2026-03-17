@@ -2460,7 +2460,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         try { var ls = localStorage.getItem("stocker_portfolio_"+currentUser.id); if(ls) setPortfolio(JSON.parse(ls)); } catch(e) {}
         // Then sync from Supabase - only use if has more stocks
         _supabase.from("portfolios").select("holdings").eq("user_id", currentUser.id).single()
-          .then(({ data }) => { if (data?.holdings && data.holdings.length > 0) setPortfolio(prev => data.holdings.length > prev.length ? data.holdings : prev); });
+          .then(({ data }) => { if (data?.holdings && data.holdings.length > 0) { const ls = localStorage.getItem("stocker_portfolio_" + currentUser.id); const lsData = ls ? JSON.parse(ls) : []; if (data.holdings.length >= lsData.length) setPortfolio(data.holdings); } });
       }, [currentUser?.id]);
 
       // Save portfolio to Supabase on every change
