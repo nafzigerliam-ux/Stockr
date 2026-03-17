@@ -2450,9 +2450,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       // Save portfolio to Supabase on every change
       useEffect(() => {
-        if (!currentUser?.id) return;
-        _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-        try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
+        if (currentUser && currentUser.id) { try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {} _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" }); } else { _supabase.auth.getSession().then(function(r){ if(r.data.session) { var uid=r.data.session.user.id; try{localStorage.setItem("stocker_portfolio_"+uid,JSON.stringify(portfolio));}catch{} _supabase.from("portfolios").upsert({user_id:uid,holdings:portfolio,updated_at:new Date().toISOString()},{onConflict:"user_id"}); } }); }
       }, [portfolio]);
 
       // Persist API keys
