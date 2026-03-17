@@ -703,11 +703,11 @@ const { useState, useEffect, useRef, useCallback } = React;
                       <div>
                         <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:2 }}>
                           <span style={{ fontSize:13, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>{h.symbol}</span>
-                          {h.name && <span style={{ fontSize:11, color:C.textMuted }}>{h.name}</span>}
                           <span style={{ fontSize:9, color:C.textMuted, border:`1px solid ${C.border}`, padding:"1px 5px", borderRadius:4 }}>{h.sector}</span>
-                          {h.live && <span style={{ fontSize:8, color:C.green, border:`1px solid ${C.green}33`, padding:"1px 4px", borderRadius:3 }}>LIVE</span>}
+                          
                         </div>
                         <div style={{ fontSize:10, color:C.textMuted }}>
+                          {h.name && <span style={{ display:"block", marginBottom:2, color:C.textMuted, fontSize:11 }}>{h.name}</span>}
                           <span style={{ fontFamily:"'Space Mono',monospace" }}>{h.shares} shares</span>
                           <span style={{ margin:"0 5px", opacity:0.4 }}>·</span>
                           <span>avg ${h.avg}</span>
