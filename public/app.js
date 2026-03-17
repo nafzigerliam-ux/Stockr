@@ -29,7 +29,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       inputBg:"rgba(0,0,0,0.03)", inputBorder:"#dde5f0",
     };
 
-    // Base portfolio — prices get overwritten by live data
+    // Base portfolio â prices get overwritten by live data
     const BASE_PORTFOLIO = [
       { symbol:"NVDA",  name:"NVIDIA Corp",    shares:12, avg:485.2,  sector:"Tech"     },
       { symbol:"AAPL",  name:"Apple Inc",      shares:25, avg:172.5,  sector:"Tech"     },
@@ -60,9 +60,9 @@ const { useState, useEffect, useRef, useCallback } = React;
     ];
 
     const FALLBACK = {
-      nvda:      "**NVDA Analysis** ↗\n\nNVIDIA is a leading AI infrastructure play. Check current price vs your average for real gain/loss. Key risk: high P/E valuation sensitive to rate changes. Consensus target: ~$950.",
-      rebalance: "**Portfolio Rebalance Suggestion** ⚖\n\nTech concentration may exceed recommended 40-50%.\n\n• Consider trimming top gainers\n• Add healthcare or dividend exposure\n• Reduces volatility by ~18% historically.",
-      tsla:      "**TSLA Risk Assessment** ⚠\n\nTesla faces margin compression and BYD competition. FSD licensing and Energy division show promise. Consider a stop-loss strategy if holding.",
+      nvda:      "**NVDA Analysis** â\n\nNVIDIA is a leading AI infrastructure play. Check current price vs your average for real gain/loss. Key risk: high P/E valuation sensitive to rate changes. Consensus target: ~$950.",
+      rebalance: "**Portfolio Rebalance Suggestion** â\n\nTech concentration may exceed recommended 40-50%.\n\nâ¢ Consider trimming top gainers\nâ¢ Add healthcare or dividend exposure\nâ¢ Reduces volatility by ~18% historically.",
+      tsla:      "**TSLA Risk Assessment** â \n\nTesla faces margin compression and BYD competition. FSD licensing and Energy division show promise. Consider a stop-loss strategy if holding.",
       default:   "I can analyze your portfolio, suggest rebalancing strategies, explain market trends, or help research specific stocks. What would you like to explore?",
     };
 
@@ -76,7 +76,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 
     const AI_LIMIT = 9999;
 
-    // ── API helpers ──────────────────────────────────────────────────────────────
+    // ââ API helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     async function fetchQuote(symbol, finnhubKey) {
       const r = await fetch(`/api/finnhub?endpoint=quote&symbol=${encodeURIComponent(symbol)}`);
       if (!r.ok) throw new Error(`Finnhub ${r.status}`);
@@ -106,7 +106,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       return data.content?.map(b => b.text || "").join("") || "";
     }
 
-    // ── Small UI helpers ─────────────────────────────────────────────────────────
+    // ââ Small UI helpers âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function Spinner({ color }) {
       return <div style={{ width:12, height:12, border:`2px solid ${color}44`, borderTop:`2px solid ${color}`, borderRadius:"50%", animation:"spin 0.8s linear infinite", display:"inline-block" }} />;
     }
@@ -143,7 +143,7 @@ const { useState, useEffect, useRef, useCallback } = React;
     function PerformanceGraph({ C, portfolio, finnhubKey }) {
       const W=580, H=110, PAD=10;
       const [range, setRange]     = useState("1M");
-      const [cache, setCache]     = useState({});   // range → data array
+      const [cache, setCache]     = useState({});   // range â data array
       const [loading, setLoading] = useState(false);
       const [hover, setHover]     = useState(null);
       const svgRef = useRef(null);
@@ -163,7 +163,7 @@ const { useState, useEffect, useRef, useCallback } = React;
         });
       };
 
-      // Portfolio signature for cache invalidation — includes shares+avg so ADD MORE triggers refresh
+      // Portfolio signature for cache invalidation â includes shares+avg so ADD MORE triggers refresh
       const portfolioSig = portfolio.map(h=>`${h.symbol}:${h.shares}:${h.avg}:${h.price||0}`).join(",");
 
       useEffect(() => {
@@ -224,7 +224,7 @@ const { useState, useEffect, useRef, useCallback } = React;
             sorted[sorted.length-1].val = todayValue;
             setCache(c => ({...c, [range]: sorted}));
           } else {
-            // Candles unavailable (free tier) — use estimated curve
+            // Candles unavailable (free tier) â use estimated curve
             setCache(c => ({...c, [range]: buildEstimated(tab.days, portfolio)}));
           }
           setLoading(false);
@@ -292,9 +292,9 @@ const { useState, useEffect, useRef, useCallback } = React;
                   {t.label}
                 </button>
               ))}
-              {loading && <span style={{ fontSize:9, color:C.cyan, marginLeft:4 }}>···</span>}
+              {loading && <span style={{ fontSize:9, color:C.cyan, marginLeft:4 }}>Â·Â·Â·</span>}
               {!loading && !cache[range] && finnhubKey && <span style={{ fontSize:8, color:C.textDim, marginLeft:4, fontFamily:"'Space Mono',monospace" }}>EST</span>}
-              {!finnhubKey && <span style={{ fontSize:8, color:C.yellow, marginLeft:4 }}>no key — estimated</span>}
+              {!finnhubKey && <span style={{ fontSize:8, color:C.yellow, marginLeft:4 }}>no key â estimated</span>}
             </div>
 
             {/* Stats */}
@@ -309,7 +309,7 @@ const { useState, useEffect, useRef, useCallback } = React;
                 </>
               ) : (
                 <>
-                  <span style={{ fontSize:12, fontWeight:700, color, fontFamily:"'Space Mono',monospace" }}>{positive?"▲":"▼"} {Math.abs(gainPct)}%</span>
+                  <span style={{ fontSize:12, fontWeight:700, color, fontFamily:"'Space Mono',monospace" }}>{positive?"â²":"â¼"} {Math.abs(gainPct)}%</span>
                   <span style={{ fontSize:11, color, fontFamily:"'Space Mono',monospace" }}>{positive?"+":"-"}${Math.abs(gainAbs).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
                   <span style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>${todayValue.toLocaleString(undefined,{maximumFractionDigits:0})}</span>
                 </>
@@ -363,7 +363,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       );
     }
 
-    // ── Add Stock Inline Panel ───────────────────────────────────────────────────
+    // ââ Add Stock Inline Panel âââââââââââââââââââââââââââââââââââââââââââââââââââ
     function AddStockPanel({ C, onSave, onClose, finnhubKey }) {
       const [symbol,    setSymbol]    = useState("");
       const [shares,    setShares]    = useState("");
@@ -400,11 +400,11 @@ const { useState, useEffect, useRef, useCallback } = React;
               <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em" }}>ADD STOCK</div>
               <div style={{ fontSize:9, color:C.textMuted, marginTop:2 }}>Enter the details of your position</div>
             </div>
-            <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1, padding:4 }}>✕</button>
+            <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1, padding:4 }}>â</button>
           </div>
 
           {error && (
-            <div style={{ background:C.red+"18", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:12, fontSize:10, color:C.red }}>⚠ {error}</div>
+            <div style={{ background:C.red+"18", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:12, fontSize:10, color:C.red }}>â  {error}</div>
           )}
 
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginBottom:12 }}>
@@ -449,14 +449,14 @@ const { useState, useEffect, useRef, useCallback } = React;
           <div style={{ display:"flex", gap:10 }}>
             <button onClick={onClose} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 20px", color:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer" }}>CANCEL</button>
             <button onClick={handleSubmit} disabled={looking} style={{ flex:1, background:`linear-gradient(135deg,${C.cyan},${C.purple})`, border:"none", borderRadius:8, padding:"10px", color:"#000", fontWeight:700, fontFamily:"'Space Mono',monospace", fontSize:11, cursor:looking?"wait":"pointer", opacity:looking?0.7:1 }}>
-              {looking ? "ADDING···" : "+ ADD TO PORTFOLIO"}
+              {looking ? "ADDINGÂ·Â·Â·" : "+ ADD TO PORTFOLIO"}
             </button>
           </div>
         </div>
       );
     }
 
-    // ── Edit Holding Modal (kept for editing existing) ───────────────────────────
+    // ââ Edit Holding Modal (kept for editing existing) âââââââââââââââââââââââââââ
     function HoldingModal({ C, existing, onSave, onClose }) {
       const isEdit = !!existing;
       const [symbol,    setSymbol]    = useState(existing?.symbol    || "");
@@ -497,11 +497,11 @@ const { useState, useEffect, useRef, useCallback } = React;
                 <div style={{ fontSize:13, fontWeight:700, color:C.text, letterSpacing:"0.1em" }}>{isEdit?"EDIT HOLDING":"ADD HOLDING"}</div>
                 <div style={{ fontSize:9, color:C.textMuted, marginTop:2 }}>{isEdit?`Editing ${existing.symbol}`:"Add a new position to your portfolio"}</div>
               </div>
-              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1 }}>✕</button>
+              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:18, cursor:"pointer", lineHeight:1 }}>â</button>
             </div>
 
             {error && (
-              <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 10px", marginBottom:12, fontSize:10, color:C.red }}>⚠ {error}</div>
+              <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 10px", marginBottom:12, fontSize:10, color:C.red }}>â  {error}</div>
             )}
 
             <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -574,7 +574,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       );
     }
 
-    // ── Portfolio Tab ────────────────────────────────────────────────────────────
+    // ââ Portfolio Tab ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function PortfolioTab({ C, portfolio, setPortfolio, loadingPrices, priceError, onRefresh, finnhubKey }) {
       const [showAdd,       setShowAdd]       = useState(false);
       const [editTarget,    setEditTarget]    = useState(null);
@@ -619,7 +619,7 @@ const { useState, useEffect, useRef, useCallback } = React;
           {confirmDel && (
             <div style={{ position:"fixed", inset:0, zIndex:200, background:"#00000088", display:"flex", alignItems:"center", justifyContent:"center", padding:20 }} onClick={()=>setConfirmDel(null)}>
               <div onClick={e=>e.stopPropagation()} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:12, padding:22, maxWidth:300, width:"100%", animation:"fadeIn 0.15s both", textAlign:"center" }}>
-                <div style={{ fontSize:24, marginBottom:10 }}>⚠</div>
+                <div style={{ fontSize:24, marginBottom:10 }}>â </div>
                 <div style={{ fontSize:13, fontWeight:700, color:C.text, marginBottom:6 }}>Remove {confirmDel}?</div>
                 <div style={{ fontSize:11, color:C.textMuted, marginBottom:16 }}>This will remove the position from your portfolio.</div>
                 <div style={{ display:"flex", gap:8 }}>
@@ -635,9 +635,9 @@ const { useState, useEffect, useRef, useCallback } = React;
           {/* Summary cards */}
           <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:18 }}>
             {[
-              { label:"Portfolio Value", value: loadingPrices ? "···" : `$${(totalValue/1000).toFixed(1)}K`, color:C.cyan  },
-              { label:"Total Gain",      value: loadingPrices ? "···" : `${totalGain>=0?"+":"-"}$${(Math.abs(totalGain)/1000).toFixed(1)}K`, color:totalGain>=0?C.green:C.red },
-              { label:"Return",          value: loadingPrices ? "···" : `${totalGain>=0?"+":""}${totalPct}%`, color:totalGain>=0?C.green:C.red },
+              { label:"Portfolio Value", value: loadingPrices ? "Â·Â·Â·" : `$${(totalValue/1000).toFixed(1)}K`, color:C.cyan  },
+              { label:"Total Gain",      value: loadingPrices ? "Â·Â·Â·" : `${totalGain>=0?"+":"-"}$${(Math.abs(totalGain)/1000).toFixed(1)}K`, color:totalGain>=0?C.green:C.red },
+              { label:"Return",          value: loadingPrices ? "Â·Â·Â·" : `${totalGain>=0?"+":""}${totalPct}%`, color:totalGain>=0?C.green:C.red },
             ].map(({label,value,color}) => (
               <div key={label} style={{ background:`linear-gradient(135deg,${color}08,${C.bgCard})`, border:`1px solid ${color}25`, borderRadius:14, padding:"14px 16px", position:"relative", overflow:"hidden" }}>
                 <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${color}80,transparent)` }}/>
@@ -655,18 +655,18 @@ const { useState, useEffect, useRef, useCallback } = React;
                   <Spinner color={C.cyan}/> Fetching live prices...
                 </div>
               )}
-              {priceError && <div style={{ fontSize:10, color:C.yellow }}>⚠ {priceError}</div>}
+              {priceError && <div style={{ fontSize:10, color:C.yellow }}>â  {priceError}</div>}
               {!loadingPrices && !priceError && portfolio.length > 0 && (
-                <div style={{ fontSize:9, color:C.green }}>● Live prices</div>
+                <div style={{ fontSize:9, color:C.green }}>â Live prices</div>
               )}
             </div>
-            <button onClick={onRefresh} disabled={loadingPrices} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 12px", color:loadingPrices?C.textDim:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:loadingPrices?"not-allowed":"pointer" }}>↻ REFRESH</button>
+            <button onClick={onRefresh} disabled={loadingPrices} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 12px", color:loadingPrices?C.textDim:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:loadingPrices?"not-allowed":"pointer" }}>â» REFRESH</button>
           </div>
 
           {/* Holdings */}
           {portfolio.length === 0 ? (
             <div style={{ textAlign:"center", padding:"40px 0", border:`1px dashed ${C.border}`, borderRadius:8 }}>
-              <div style={{ fontSize:28, marginBottom:10 }}>📊</div>
+              <div style={{ fontSize:28, marginBottom:10 }}>ð</div>
               <div style={{ fontSize:12, color:C.textMuted, fontFamily:"'Space Mono',monospace", marginBottom:6 }}>No holdings yet</div>
               <div style={{ fontSize:10, color:C.textDim }}>Go to the SEARCH tab to find and add stocks</div>
             </div>
@@ -687,7 +687,7 @@ const { useState, useEffect, useRef, useCallback } = React;
                 return (
                   <div key={h.symbol} style={{ background:C.bgCard, border:`1px solid ${isOpen?C.cyan+"55":C.border}`, borderRadius:14, overflow:"hidden", transition:"border-color 0.2s", animation:`fadeIn 0.3s ${i*0.05}s both`, position:"relative" }}>
 
-                    {/* Main row — clickable */}
+                    {/* Main row â clickable */}
                     <div style={{ padding:"13px 16px", display:"grid", gridTemplateColumns:"auto 1fr auto auto", gap:12, alignItems:"center", cursor:"pointer", position:"relative" }}
                       onClick={()=>setExpandedSymbol(isOpen?null:h.symbol)}
                       onMouseEnter={e=>{e.currentTarget.style.background=C.bgCardHover;e.currentTarget.querySelector(".row-actions").style.opacity="1";}}
@@ -696,7 +696,7 @@ const { useState, useEffect, useRef, useCallback } = React;
                       {/* Hover actions */}
                       <div className="row-actions" style={{ position:"absolute", top:7, right:8, display:"flex", gap:4, opacity:0, transition:"opacity 0.15s", zIndex:2 }}>
                         <button onClick={e=>{e.stopPropagation();setEditTarget(h);}} style={{ background:C.bgCard, border:`1px solid ${C.cyan}44`, borderRadius:4, padding:"2px 8px", color:C.cyan, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>EDIT</button>
-                        <button onClick={e=>{e.stopPropagation();setConfirmDel(h.symbol);}} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:4, padding:"2px 8px", color:C.red, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>✕</button>
+                        <button onClick={e=>{e.stopPropagation();setConfirmDel(h.symbol);}} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:4, padding:"2px 8px", color:C.red, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>â</button>
                       </div>
 
                       {/* Logo */}
@@ -711,10 +711,10 @@ const { useState, useEffect, useRef, useCallback } = React;
                         </div>
                         <div style={{ fontSize:10, color:C.textMuted }}>
                           <span style={{ fontFamily:"'Space Mono',monospace" }}>{h.shares} shares</span>
-                          <span style={{ margin:"0 5px", opacity:0.4 }}>·</span>
+                          <span style={{ margin:"0 5px", opacity:0.4 }}>Â·</span>
                           <span>avg ${h.avg}</span>
                           {h.dateAdded && <>
-                            <span style={{ margin:"0 5px", opacity:0.4 }}>·</span>
+                            <span style={{ margin:"0 5px", opacity:0.4 }}>Â·</span>
                             <span style={{ color:C.cyan, fontSize:9 }}>since {new Date(h.dateAdded).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"})}</span>
                           </>}
                         </div>
@@ -731,7 +731,7 @@ const { useState, useEffect, useRef, useCallback } = React;
                           ? <div style={{ display:"flex", justifyContent:"flex-end" }}><Spinner color={C.cyan}/></div>
                           : <>
                               <div style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>${price.toFixed(2)}</div>
-                              <div style={{ fontSize:11, color:pos?C.green:C.red, marginTop:2 }}>{pos?"▲":"▼"} {Math.abs(h.change||0).toFixed(2)}%</div>
+                              <div style={{ fontSize:11, color:pos?C.green:C.red, marginTop:2 }}>{pos?"â²":"â¼"} {Math.abs(h.change||0).toFixed(2)}%</div>
                               <div style={{ fontSize:10, color:totalPos?C.green+"99":C.red+"99" }}>{gain>=0?"+":""}{gain.toFixed(0)}</div>
                             </>
                         }
@@ -785,7 +785,7 @@ const { useState, useEffect, useRef, useCallback } = React;
       );
     }
 
-    // ── AI Advisor Tab ───────────────────────────────────────────────────────────
+    // ââ AI Advisor Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function AIAdvisorTab({ C, aiUsed, setAiUsed, anthropicKey, portfolio }) {
       const [messages, setMessages] = useState([{ role:"ai", text:FALLBACK.default }]);
       const [input, setInput]       = useState("");
@@ -798,13 +798,13 @@ const { useState, useEffect, useRef, useCallback } = React;
       useEffect(() => { endRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
       const portfolioSummary = portfolio.map(h =>
-        `${h.symbol}(${h.shares}@avg$${h.avg}→$${(h.price||h.avg).toFixed(2)},${((((h.price||h.avg)-h.avg)/h.avg)*100).toFixed(1)}%)`
+        `${h.symbol}(${h.shares}@avg$${h.avg}â$${(h.price||h.avg).toFixed(2)},${((((h.price||h.avg)-h.avg)/h.avg)*100).toFixed(1)}%)`
       ).join(", ");
 
       const send = async (text) => {
         const msg = (text || input).trim();
         if (!msg) return;
-        if (!hasKey) { setApiError("Add your Anthropic API key in Settings ⚙ to use AI features."); return; }
+        if (!hasKey) { setApiError("Add your Anthropic API key in Settings â to use AI features."); return; }
         if (remaining === 0) return;
         setInput(""); setApiError("");
         setMessages(prev => [...prev, { role:"user", text:msg }]);
@@ -812,11 +812,11 @@ const { useState, useEffect, useRef, useCallback } = React;
         setLoading(true);
         try {
           const aiText = await callClaude({
-            system: `You are Stockr AI's Financial Companion — a sharp, intelligent assistant built into a personal portfolio intelligence dashboard. You have deep knowledge of financial markets, investing strategy, macroeconomics, and portfolio management.
+            system: `You are Stockr AI's Financial Companion â a sharp, intelligent assistant built into a personal portfolio intelligence dashboard. You have deep knowledge of financial markets, investing strategy, macroeconomics, and portfolio management.
 
 ## Personality
 - Confident but not arrogant. Direct but not cold.
-- Talk like a smart friend who happens to be a financial analyst — not a stiff corporate advisor.
+- Talk like a smart friend who happens to be a financial analyst â not a stiff corporate advisor.
 - Brief by default. Go deep only when asked.
 - Never start a response with "I", "Great question", or "Sure!".
 - Don't repeat the user's question back before answering.
@@ -824,7 +824,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 ## Portfolio Context
 The user's current portfolio: ${portfolioSummary}
 
-Use this data actively — synthesize it into insight rather than dumping raw numbers back. For example, instead of "You have 12 shares of NVDA", say "NVDA is your biggest position — worth watching if AI sentiment shifts."
+Use this data actively â synthesize it into insight rather than dumping raw numbers back. For example, instead of "You have 12 shares of NVDA", say "NVDA is your biggest position â worth watching if AI sentiment shifts."
 
 ## What You Help With
 - Portfolio analysis: concentration risk, sector exposure, winners/losers
@@ -846,7 +846,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           setMessages(prev => [...prev, { role:"ai", text:aiText || getFallback(msg) }]);
         } catch(e) {
           setAiUsed(u => u-1);
-          setApiError(e.message === "NO_KEY" ? "Add your Anthropic API key in Settings ⚙." : `Error: ${e.message}`);
+          setApiError(e.message === "NO_KEY" ? "Add your Anthropic API key in Settings â." : `Error: ${e.message}`);
           setMessages(prev => prev.slice(0,-1));
         }
         setLoading(false);
@@ -862,11 +862,11 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       return (
         <div style={{ display:"flex", flexDirection:"column", height:480 }}>
-          {/* Status — compact row with small query dots */}
+          {/* Status â compact row with small query dots */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, paddingBottom:10, borderBottom:`1px solid ${C.border}` }}>
             {hasKey
-              ? <span style={{ fontSize:10, color:C.green }}>● AI Connected</span>
-              : <span style={{ fontSize:10, color:C.yellow }}>⚙ Add Anthropic key in Settings</span>
+              ? <span style={{ fontSize:10, color:C.green }}>â AI Connected</span>
+              : <span style={{ fontSize:10, color:C.yellow }}>â Add Anthropic key in Settings</span>
             }
             {hasKey && (
               <div style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -881,7 +881,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           </div>
 
           {apiError && (
-            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red, fontFamily:"'Space Mono',monospace" }}>⚠ {apiError}</div>
+            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red, fontFamily:"'Space Mono',monospace" }}>â  {apiError}</div>
           )}
 
           {/* Messages */}
@@ -907,7 +907,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             <div ref={endRef}/>
           </div>
 
-          {/* Quick prompts — 2x2 grid */}
+          {/* Quick prompts â 2x2 grid */}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, margin:"8px 0" }}>
             {["Analyze portfolio","Rebalance advice","Biggest risk","Best performer"].map(s=>(
               <button key={s} onClick={()=>send(s)} disabled={!hasKey||remaining<=0} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, padding:"6px 10px", fontSize:10, color:(hasKey&&remaining>0)?C.textMuted:C.textDim, cursor:(hasKey&&remaining>0)?"pointer":"not-allowed", fontFamily:"'Space Mono',monospace", transition:"all 0.2s", textAlign:"left" }}
@@ -919,7 +919,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
           {/* Input */}
           <div style={{ display:"flex", gap:8, background:"rgba(255,255,255,0.06)", border:`1px solid ${(!hasKey||remaining<=0)?C.red+"44":C.border}`, borderRadius:10, padding:"8px 12px", alignItems:"center" }}>
-            <span style={{ fontSize:12, color:C.cyan }}>›</span>
+            <span style={{ fontSize:12, color:C.cyan }}>âº</span>
             <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} disabled={!hasKey||remaining<=0}
               placeholder={!hasKey?"Add API key in Settings...":remaining>0?"Ask about your portfolio...":"Query limit reached"}
               style={{ flex:1, background:"none", border:"none", outline:"none", color:(hasKey&&remaining>0)?C.text:C.textDim, fontFamily:"'Space Mono',monospace", fontSize:12, cursor:(hasKey&&remaining>0)?"text":"not-allowed" }}/>
@@ -929,7 +929,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-    // ── News Tab ─────────────────────────────────────────────────────────────────
+    // ââ News Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function NewsTab({ C, newsKey, finnhubKey, portfolio, onArticleCount }) {
       const [articles, setArticles] = useState([]);
       const [loading, setLoading]   = useState(false);
@@ -952,9 +952,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       const fetchNews = async (category) => {
         setLoading(true); setError(""); setArticles([]);
 
-        // ── Alpha Vantage skipped — using Finnhub ────────────────────────────
+        // ââ Alpha Vantage skipped â using Finnhub ââââââââââââââââââââââââââââ
 
-        // ── Finnhub fallback (free, no sentiment) ─────────────────────────────
+        // ââ Finnhub fallback (free, no sentiment) âââââââââââââââââââââââââââââ
         try {
           const today = new Date().toISOString().slice(0,10);
           const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
@@ -1000,8 +1000,8 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       return (
         <div>
           <div style={{ display:"flex", gap:6, marginBottom:14, overflowX:"auto", paddingBottom:2 }}>
-            <button style={pill(filter==="general")} onClick={()=>setFilter("general")}>🌐 Market</button>
-            <button style={pill(filter==="forex")} onClick={()=>setFilter("forex")}>💱 Forex</button>
+            <button style={pill(filter==="general")} onClick={()=>setFilter("general")}>ð Market</button>
+            <button style={pill(filter==="forex")} onClick={()=>setFilter("forex")}>ð± Forex</button>
             {portfolioSymbols.map(sym => (
               <button key={sym} style={pill(filter===sym)} onClick={()=>setFilter(sym)}>{sym}</button>
             ))}
@@ -1009,7 +1009,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
           {!newsKey && !finnhubKey ? (
             <div style={{ textAlign:"center", padding:"50px 20px", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>📰</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>ð°</div>
               <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:8 }}>No API keys connected</div>
               <div style={{ fontSize:11, color:C.textMuted, lineHeight:1.6, marginBottom:6 }}>
                 News is powered by <span style={{color:C.cyan}}>Finnhub</span>
@@ -1019,12 +1019,12 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             <>
               {source === "finnhub" && !newsKey && (
                 <div style={{ background:`${C.cyan}10`, border:`1px solid ${C.cyan}25`, borderRadius:10, padding:"8px 12px", marginBottom:10, fontSize:10, color:C.textMuted, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <span>Showing Finnhub news · <span style={{color:C.cyan}}>no sentiment data</span></span>
+                  <span>Showing Finnhub news Â· <span style={{color:C.cyan}}>no sentiment data</span></span>
                   <span style={{color:C.textDim}}>Add Alpha Vantage key for sentiment</span>
                 </div>
               )}
               {error && (
-                <div style={{ background:C.red+"18", border:`1px solid ${C.red}35`, borderRadius:12, padding:"12px 16px", fontSize:12, color:C.red, marginBottom:12 }}>⚠ {error}</div>
+                <div style={{ background:C.red+"18", border:`1px solid ${C.red}35`, borderRadius:12, padding:"12px 16px", fontSize:12, color:C.red, marginBottom:12 }}>â  {error}</div>
               )}
               {loading && (
                 <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
@@ -1068,7 +1068,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         </div>
       );
     }
-    // ── Search Tab ───────────────────────────────────────────────────────────────
+    // ââ Search Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     // Popular stocks & crypto shown by default, Finnhub symbol search for queries
     const POPULAR_STOCKS = [
       { symbol:"AAPL",  name:"Apple Inc",           type:"stock",  sector:"Tech"       },
@@ -1152,7 +1152,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         }
       }, [browseTab, finnhubKey]);
 
-      // Handle typing — instant local filter + debounced Finnhub search
+      // Handle typing â instant local filter + debounced Finnhub search
       const handleQueryChange = (val) => {
         setQuery(val);
         setApiError("");
@@ -1247,9 +1247,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           if (data.s === "ok" && data.c?.length) {
             setPanelAvg(data.c[0]);
           } else {
-            // Candle not available (free tier) — fall back to current price
+            // Candle not available (free tier) â fall back to current price
             setPanelAvg(prices[item.symbol]?.price || null);
-            setPanelError("Historical price unavailable on free tier — using current price");
+            setPanelError("Historical price unavailable on free tier â using current price");
           }
         } catch {
           setPanelAvg(prices[item.symbol]?.price || null);
@@ -1309,15 +1309,15 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           {/* Search bar with dropdown */}
           <div style={{ position:"relative", marginBottom:12 }}>
             <div style={{ display:"flex", gap:10, background:C.bgCard, border:`1px solid ${showDropdown&&query?C.cyan+"88":C.borderBright}`, borderRadius: showDropdown&&query&&displayList.length?"14px 14px 0 0":"14px", padding:"11px 16px", alignItems:"center", backdropFilter:"blur(10px)", transition:"border-radius 0.15s, border-color 0.2s" }}>
-              <span style={{ fontSize:14, color:C.cyan }}>⌕</span>
+              <span style={{ fontSize:14, color:C.cyan }}>â</span>
               <input value={query} onChange={e=>{ handleQueryChange(e.target.value); setShowDropdown(true); }}
                 onKeyDown={e=>{ if(e.key==="Enter"&&query.trim()){ setShowDropdown(false); doSearch(query.trim()); } if(e.key==="Escape"){ setShowDropdown(false); } }}
                 onFocus={()=>query&&setShowDropdown(true)}
                 onBlur={()=>setTimeout(()=>setShowDropdown(false), 150)}
-                placeholder="Search any stock or crypto — e.g. Apple, BTC, NVDA..."
+                placeholder="Search any stock or crypto â e.g. Apple, BTC, NVDA..."
                 style={{ flex:1, background:"none", border:"none", outline:"none", color:C.text, fontFamily:"'Space Mono',monospace", fontSize:11 }}/>
               {loading && <Spinner color={C.cyan}/>}
-              {query && <button onClick={()=>{setQuery("");setApiError("");setShowDropdown(false);}} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", lineHeight:1 }}>✕</button>}
+              {query && <button onClick={()=>{setQuery("");setApiError("");setShowDropdown(false);}} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", lineHeight:1 }}>â</button>}
             </div>
             {/* Dropdown autocomplete */}
             {showDropdown && query && displayList.length > 0 && (
@@ -1348,19 +1348,19 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           </div>
 
           {!finnhubKey && (
-            <div style={{ background:C.yellow+"22", border:`1px solid ${C.yellow}44`, borderRadius:6, padding:"7px 12px", marginBottom:10, fontSize:10, color:C.yellow }}>⚙ Add your Finnhub API key in Settings to see live prices and search all markets</div>
+            <div style={{ background:C.yellow+"22", border:`1px solid ${C.yellow}44`, borderRadius:6, padding:"7px 12px", marginBottom:10, fontSize:10, color:C.yellow }}>â Add your Finnhub API key in Settings to see live prices and search all markets</div>
           )}
           {apiError && (
-            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red }}>⚠ {apiError}</div>
+            <div style={{ background:C.red+"22", border:`1px solid ${C.red}44`, borderRadius:6, padding:"7px 12px", marginBottom:8, fontSize:10, color:C.red }}>â  {apiError}</div>
           )}
 
           {/* Tab switcher + header */}
           <div style={{ display:"flex", gap:6, marginBottom:12, alignItems:"center" }}>
-            <button style={{ background:browseTab==="stocks"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="stocks"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="stocks"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("stocks");}}>📈 STOCKS</button>
-            <button style={{ background:browseTab==="crypto"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="crypto"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="crypto"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("crypto");}}>₿ CRYPTO</button>
+            <button style={{ background:browseTab==="stocks"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="stocks"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="stocks"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("stocks");}}>ð STOCKS</button>
+            <button style={{ background:browseTab==="crypto"?`${C.cyan}22`:"none", border:`1px solid ${browseTab==="crypto"?C.cyan:C.border}`, borderRadius:6, padding:"4px 14px", color:browseTab==="crypto"?C.cyan:C.textMuted, fontFamily:"'Space Mono',monospace", fontSize:10, cursor:"pointer", transition:"all 0.2s" }} onClick={()=>{setQuery("");setBrowseTab("crypto");}}>â¿ CRYPTO</button>
             {!isSearchMode && (
               <span style={{ fontSize:9, color:C.green, marginLeft:4, letterSpacing:"0.1em", display:"flex", alignItems:"center", gap:5 }}>
-                {loadingPrices ? <Spinner color={C.green}/> : "★ POPULAR"}
+                {loadingPrices ? <Spinner color={C.green}/> : "â POPULAR"}
               </span>
             )}
             {isSearchMode && <span style={{ fontSize:9, color:C.textMuted }}>RESULTS FOR "{query}"</span>}
@@ -1404,7 +1404,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                         ) : (
                           <>
                             <div style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>${price<0.01?price.toFixed(6):price.toFixed(2)}</div>
-                            <div style={{ fontSize:10, color:change>=0?C.green:C.red }}>{change>=0?"▲":"▼"} {Math.abs(change).toFixed(2)}%</div>
+                            <div style={{ fontSize:10, color:change>=0?C.green:C.red }}>{change>=0?"â²":"â¼"} {Math.abs(change).toFixed(2)}%</div>
                           </>
                         )}
                       </div>
@@ -1413,16 +1413,16 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                       {(() => { const isW = (watchlist||[]).includes(item.symbol); return (
                         <button onClick={()=>{ isW ? setWatchlist(p=>p.filter(s=>s!==item.symbol)) : setWatchlist(p=>[...p,item.symbol]); }}
                           style={{ background:isW?'rgba(167,139,250,0.15)':'none', border:'1px solid '+(isW?'#a78bfa':'#1a2840'), borderRadius:8, padding:'6px 10px', color:isW?'#a78bfa':'#5a7090', fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:'pointer', transition:'all 0.2s', marginRight:6 }}>
-                          {isW ? '👁 WATCHING' : '👁 WATCH'}
+                          {isW ? 'ð WATCHING' : 'ð WATCH'}
                         </button>
                       ); })()}
                       {/* Add button */}
                       {isAdded ? (
-                        <div style={{ background:C.green+"22", border:`1px solid ${C.green}55`, borderRadius:8, padding:"6px 14px", color:C.green, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace" }}>✓ ADDED</div>
+                        <div style={{ background:C.green+"22", border:`1px solid ${C.green}55`, borderRadius:8, padding:"6px 14px", color:C.green, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace" }}>â ADDED</div>
                       ) : (
                         <button onClick={()=>openPanel(item)}
                           style={{ background:isOpen?`${C.cyan}18`:`linear-gradient(135deg,${C.cyan}22,${C.purple}22)`, border:`1px solid ${isOpen?C.cyan:C.cyan+"55"}`, borderRadius:8, padding:"6px 14px", color:C.cyan, fontSize:10, fontWeight:700, fontFamily:"'Space Mono',monospace", cursor:"pointer", transition:"all 0.2s" }}>
-                          {isOpen ? "✕ CLOSE" : alreadyIn ? "+ ADD MORE" : "+ ADD"}
+                          {isOpen ? "â CLOSE" : alreadyIn ? "+ ADD MORE" : "+ ADD"}
                         </button>
                       )}
                     </div>
@@ -1432,7 +1432,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                   {isOpen && (
                     <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${C.border}`, animation:"fadeIn 0.15s both" }}>
                       {panelError && (
-                        <div style={{ fontSize:9, color:C.yellow, marginBottom:8 }}>⚠ {panelError}</div>
+                        <div style={{ fontSize:9, color:C.yellow, marginBottom:8 }}>â  {panelError}</div>
                       )}
                       <div style={{ display:"flex", gap:10, alignItems:"flex-end", flexWrap:"wrap" }}>
 
@@ -1463,7 +1463,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                         <div style={{ flex:"1 1 110px", minWidth:100 }}>
                           <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.1em", marginBottom:5 }}>PRICE ON DATE</div>
                           <div style={{ background:"rgba(255,255,255,0.03)", border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 10px", fontSize:11, fontFamily:"'Space Mono',monospace", color:panelAvg?C.green:C.textDim, minHeight:35, display:"flex", alignItems:"center" }}>
-                            {panelFetching ? <Spinner color={C.cyan}/> : panelAvg ? `$${panelAvg.toFixed(2)}` : "—"}
+                            {panelFetching ? <Spinner color={C.cyan}/> : panelAvg ? `$${panelAvg.toFixed(2)}` : "â"}
                           </div>
                         </div>
 
@@ -1477,7 +1477,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                       {/* Cost preview */}
                       {panelShares && parseFloat(panelShares) > 0 && panelAvg && (
                         <div style={{ marginTop:8, fontSize:10, color:C.textMuted }}>
-                          {panelShares} × ${panelAvg.toFixed(2)} = <span style={{ color:C.cyan, fontFamily:"'Space Mono',monospace", fontWeight:700 }}>${(parseFloat(panelShares)*panelAvg).toLocaleString(undefined,{maximumFractionDigits:2})}</span>
+                          {panelShares} Ã ${panelAvg.toFixed(2)} = <span style={{ color:C.cyan, fontFamily:"'Space Mono',monospace", fontWeight:700 }}>${(parseFloat(panelShares)*panelAvg).toLocaleString(undefined,{maximumFractionDigits:2})}</span>
                         </div>
                       )}
                     </div>
@@ -1493,13 +1493,13 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-    // ── Alerts Tab ───────────────────────────────────────────────────────────────
+    // ââ Alerts Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function AlertsTab({ C, finnhubKey, portfolio, onAlertCount, currentUser }) {
       const [quotes, setQuotes]     = useState({});
       const [loading, setLoading]   = useState(false);
       const [lastUpdated, setLastUpdated] = useState(null);
 
-      // ── Price Alerts (Supabase) ───────────────────────────────────────────────
+      // ââ Price Alerts (Supabase) âââââââââââââââââââââââââââââââââââââââââââââââ
       const [priceAlerts, setPriceAlerts]   = useState([]);
       const [alertSymbol, setAlertSymbol]   = useState("");
       const [alertCond, setAlertCond]       = useState("above");
@@ -1528,7 +1528,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         });
         if (error) { setAlertMsg("Failed to save alert."); }
         else {
-          setAlertMsg("✓ Alert saved! You'll get an email when it triggers.");
+          setAlertMsg("â Alert saved! You'll get an email when it triggers.");
           setAlertSymbol(""); setAlertPrice("");
           // Reload alerts
           const { data } = await _supabase.from("alerts").select("*").eq("user_id", currentUser.id).eq("triggered", false);
@@ -1581,119 +1581,119 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           const unrealizedPnL  = (price - avg) * h.shares;
           const key = (type) => `${h.symbol}_${type}_${today}`;
 
-          // ── 1. Big move up today (3%+) ───────────────────────────────────────
+          // ââ 1. Big move up today (3%+) âââââââââââââââââââââââââââââââââââââââ
           if (change >= 3) {
             const k = key("surge");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: change >= 6 ? "high" : "medium",
-              icon: change >= 6 ? "🚀" : "📈",
+              icon: change >= 6 ? "ð" : "ð",
               color: C.green,
               title: `${h.symbol} is surging today`,
-              body: `Up ${change.toFixed(1)}% today — you're ${todayDollar >= 0 ? "gaining" : "losing"} $${Math.abs(todayDollar).toFixed(0)} on this position`,
+              body: `Up ${change.toFixed(1)}% today â you're ${todayDollar >= 0 ? "gaining" : "losing"} $${Math.abs(todayDollar).toFixed(0)} on this position`,
               signal: change >= 6 ? "SELL" : "HOLD",
-              signalNote: change >= 6 ? "Strong move — consider taking some profit" : "Let it run, but watch for reversal",
+              signalNote: change >= 6 ? "Strong move â consider taking some profit" : "Let it run, but watch for reversal",
             });
           }
 
-          // ── 2. Big drop today (3%+) ───────────────────────────────────────────
+          // ââ 2. Big drop today (3%+) âââââââââââââââââââââââââââââââââââââââââââ
           if (change <= -3) {
             const k = key("drop");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: change <= -6 ? "high" : "medium",
-              icon: change <= -6 ? "🆘" : "📉",
+              icon: change <= -6 ? "ð" : "ð",
               color: C.red,
               title: `${h.symbol} is dropping today`,
-              body: `Down ${Math.abs(change).toFixed(1)}% today — you're losing $${Math.abs(todayDollar).toFixed(0)} on this position today`,
+              body: `Down ${Math.abs(change).toFixed(1)}% today â you're losing $${Math.abs(todayDollar).toFixed(0)} on this position today`,
               signal: change <= -6 ? "SELL" : "HOLD",
-              signalNote: change <= -6 ? "Significant drop — consider cutting losses" : "Short-term dip, hold unless fundamentals change",
+              signalNote: change <= -6 ? "Significant drop â consider cutting losses" : "Short-term dip, hold unless fundamentals change",
             });
           }
 
-          // ── 3. Deep in the red vs your buy price ─────────────────────────────
+          // ââ 3. Deep in the red vs your buy price âââââââââââââââââââââââââââââ
           if (gainFromAvg <= -10) {
             const k = key("deep_loss");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: gainFromAvg <= -20 ? "high" : "medium",
-              icon: "🔻",
+              icon: "ð»",
               color: C.red,
               title: `${h.symbol} is well below your buy price`,
-              body: `Down ${Math.abs(gainFromAvg).toFixed(1)}% from your avg of $${avg.toFixed(2)} · unrealized loss: $${Math.abs(unrealizedPnL).toFixed(0)}`,
+              body: `Down ${Math.abs(gainFromAvg).toFixed(1)}% from your avg of $${avg.toFixed(2)} Â· unrealized loss: $${Math.abs(unrealizedPnL).toFixed(0)}`,
               signal: gainFromAvg <= -20 ? "SELL" : "HOLD",
               signalNote: gainFromAvg <= -20 ? "Consider cutting losses to protect capital" : "Evaluate if the thesis still holds",
             });
           } else if (gainFromAvg <= -3 && gainFromAvg > -10) {
-            // Mild dip below cost — softer warning
+            // Mild dip below cost â softer warning
             const k = key("below_avg");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: "medium",
-              icon: "⚠️",
+              icon: "â ï¸",
               color: C.yellow,
               title: `${h.symbol} slipped below your buy price`,
-              body: `Currently $${price.toFixed(2)} vs your avg of $${avg.toFixed(2)} — you're down ${Math.abs(gainFromAvg).toFixed(1)}%`,
+              body: `Currently $${price.toFixed(2)} vs your avg of $${avg.toFixed(2)} â you're down ${Math.abs(gainFromAvg).toFixed(1)}%`,
               signal: "HOLD",
-              signalNote: "Minor dip — watch closely before adding or selling",
+              signalNote: "Minor dip â watch closely before adding or selling",
             });
           }
 
-          // ── 4. Strong gain vs buy price ───────────────────────────────────────
+          // ââ 4. Strong gain vs buy price âââââââââââââââââââââââââââââââââââââââ
           if (gainFromAvg >= 25) {
             const k = key("big_gain");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: gainFromAvg >= 50 ? "high" : "medium",
-              icon: "💰",
+              icon: "ð°",
               color: C.green,
               title: `${h.symbol} up ${gainFromAvg.toFixed(0)}% from your buy`,
-              body: `Position is worth $${positionValue.toFixed(0)} · unrealized gain: +$${unrealizedPnL.toFixed(0)} since avg $${avg.toFixed(2)}`,
+              body: `Position is worth $${positionValue.toFixed(0)} Â· unrealized gain: +$${unrealizedPnL.toFixed(0)} since avg $${avg.toFixed(2)}`,
               signal: "SELL",
-              signalNote: gainFromAvg >= 50 ? "Exceptional gain — strongly consider taking profit" : "Strong gain — consider trimming your position",
+              signalNote: gainFromAvg >= 50 ? "Exceptional gain â strongly consider taking profit" : "Strong gain â consider trimming your position",
             });
           } else if (gainFromAvg >= 10) {
             const k = key("mod_gain");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: "medium",
-              icon: "✨",
+              icon: "â¨",
               color: C.green,
               title: `${h.symbol} up ${gainFromAvg.toFixed(0)}% from your buy`,
-              body: `Sitting on +$${unrealizedPnL.toFixed(0)} gain · current price $${price.toFixed(2)} vs avg $${avg.toFixed(2)}`,
+              body: `Sitting on +$${unrealizedPnL.toFixed(0)} gain Â· current price $${price.toFixed(2)} vs avg $${avg.toFixed(2)}`,
               signal: "HOLD",
-              signalNote: "Good gain — hold unless you need liquidity",
+              signalNote: "Good gain â hold unless you need liquidity",
             });
           }
 
-          // ── 5. Large dollar loss today (>$200 or >2% of position) ────────────
+          // ââ 5. Large dollar loss today (>$200 or >2% of position) ââââââââââââ
           const pctTodayOfPosition = Math.abs(todayDollar) / positionValue * 100;
           if (todayDollar <= -200 || (todayDollar < 0 && pctTodayOfPosition >= 2)) {
             const k = key("dollar_loss_today");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: Math.abs(todayDollar) >= 500 ? "high" : "medium",
-              icon: "💸",
+              icon: "ð¸",
               color: C.red,
               title: `${h.symbol} costing you today`,
-              body: `-$${Math.abs(todayDollar).toFixed(0)} on your ${h.shares} shares (${Math.abs(change).toFixed(1)}% move) — bigger than typical daily swing`,
+              body: `-$${Math.abs(todayDollar).toFixed(0)} on your ${h.shares} shares (${Math.abs(change).toFixed(1)}% move) â bigger than typical daily swing`,
               signal: "HOLD",
-              signalNote: "Don't panic-sell — assess if news-driven or just volatility",
+              signalNote: "Don't panic-sell â assess if news-driven or just volatility",
             });
           }
 
-          // ── 6. Approaching buy price from above (within 3%) ──────────────────
+          // ââ 6. Approaching buy price from above (within 3%) ââââââââââââââââââ
           if (gainFromAvg > 0 && gainFromAvg < 3) {
             const k = key("near_avg");
             alerts.push({
               key: k, symbol: h.symbol,
               severity: "medium",
-              icon: "🎯",
+              icon: "ð¯",
               color: C.yellow,
               title: `${h.symbol} nearing your buy price`,
-              body: `Only ${gainFromAvg.toFixed(1)}% above your avg of $${avg.toFixed(2)} — if it drops further you'll be in the red`,
+              body: `Only ${gainFromAvg.toFixed(1)}% above your avg of $${avg.toFixed(2)} â if it drops further you'll be in the red`,
               signal: "HOLD",
-              signalNote: "Watch closely — consider buying more if you're bullish",
+              signalNote: "Watch closely â consider buying more if you're bullish",
             });
           }
         });
@@ -1715,9 +1715,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       return (
         <div>
-          {/* ── Price Alert Creator ─────────────────────────────────────────── */}
+          {/* ââ Price Alert Creator âââââââââââââââââââââââââââââââââââââââââââ */}
           <div style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:12, padding:"18px 20px", marginBottom:20 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em", marginBottom:14 }}>🔔 SET PRICE ALERT</div>
+            <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.08em", marginBottom:14 }}>ð SET PRICE ALERT</div>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
               <input value={alertSymbol} onChange={e=>setAlertSymbol(e.target.value.toUpperCase())}
                 placeholder="Symbol (e.g. AAPL)"
@@ -1734,20 +1734,20 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 {alertSaving ? "..." : "+ Add Alert"}
               </button>
             </div>
-            {alertMsg && <div style={{ marginTop:10, fontSize:11, color:alertMsg.startsWith("✓")?C.green:C.red }}>{alertMsg}</div>}
+            {alertMsg && <div style={{ marginTop:10, fontSize:11, color:alertMsg.startsWith("â")?C.green:C.red }}>{alertMsg}</div>}
 
             {/* Active price alerts list */}
             {priceAlerts.length > 0 && (
               <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:6 }}>
-                <div style={{ fontSize:10, color:C.textMuted, letterSpacing:"0.08em", marginBottom:2 }}>ACTIVE ALERTS — email: {currentUser?.email}</div>
+                <div style={{ fontSize:10, color:C.textMuted, letterSpacing:"0.08em", marginBottom:2 }}>ACTIVE ALERTS â email: {currentUser?.email}</div>
                 {priceAlerts.map(a => (
                   <div key={a.id} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 12px" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                       <span style={{ fontWeight:700, color:C.cyan, fontFamily:"'DM Mono',monospace", fontSize:12 }}>{a.symbol}</span>
-                      <span style={{ color:C.textMuted, fontSize:11 }}>{a.condition === "above" ? "▲ rises above" : "▼ falls below"}</span>
+                      <span style={{ color:C.textMuted, fontSize:11 }}>{a.condition === "above" ? "â² rises above" : "â¼ falls below"}</span>
                       <span style={{ fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace", fontSize:12 }}>${Number(a.target_price).toFixed(2)}</span>
                     </div>
-                    <button onClick={()=>deletePriceAlert(a.id)} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", padding:"2px 6px", borderRadius:4 }}>✕</button>
+                    <button onClick={()=>deletePriceAlert(a.id)} style={{ background:"none", border:"none", color:C.textMuted, fontSize:14, cursor:"pointer", padding:"2px 6px", borderRadius:4 }}>â</button>
                   </div>
                 ))}
               </div>
@@ -1767,14 +1767,14 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
               {lastUpdated && <span style={{ fontSize:9, color:C.textDim }}>updated {lastUpdated.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span>}
               <button onClick={refresh} disabled={loading||!finnhubKey} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 12px", color:loading?C.textDim:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:loading?"not-allowed":"pointer" }}>
-                {loading ? "···" : "↻ REFRESH"}
+                {loading ? "Â·Â·Â·" : "â» REFRESH"}
               </button>
             </div>
           </div>
 
           {!finnhubKey && (
             <div style={{ textAlign:"center", padding:"50px 20px", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>🔔</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>ð</div>
               <div style={{ fontSize:13, fontWeight:600, color:C.text, marginBottom:8 }}>No Finnhub key connected</div>
               <div style={{ fontSize:11, color:C.textMuted, lineHeight:1.6 }}>Add your Finnhub key in Settings to get<br/>automatic alerts based on market movement</div>
             </div>
@@ -1782,7 +1782,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
           {finnhubKey && !portfolio.length && (
             <div style={{ textAlign:"center", padding:"40px 0", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-              <div style={{ fontSize:28, marginBottom:10 }}>📊</div>
+              <div style={{ fontSize:28, marginBottom:10 }}>ð</div>
               <div style={{ fontSize:12, color:C.textMuted }}>Add stocks to your portfolio to see alerts</div>
             </div>
           )}
@@ -1797,7 +1797,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             <>
               {alerts.length === 0 && (
                 <div style={{ textAlign:"center", padding:"40px 0", border:`1px dashed ${C.border}`, borderRadius:14 }}>
-                  <div style={{ fontSize:28, marginBottom:8 }}>✅</div>
+                  <div style={{ fontSize:28, marginBottom:8 }}>â</div>
                   <div style={{ fontSize:12, fontWeight:600, color:C.green, marginBottom:4 }}>All clear</div>
                   <div style={{ fontSize:10, color:C.textMuted }}>No notable market activity in your portfolio right now</div>
                 </div>
@@ -1819,7 +1819,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                           {quotes[a.symbol] && (
                             <div style={{ display:"flex", gap:6, alignItems:"center" }}>
                               <span style={{ fontSize:11, color:C.text, fontFamily:"'DM Mono',monospace", fontWeight:600 }}>${quotes[a.symbol].price.toFixed(2)}</span>
-                              <span style={{ fontSize:10, color:quotes[a.symbol].change>=0?C.green:C.red }}>{quotes[a.symbol].change>=0?"▲":"▼"} {Math.abs(quotes[a.symbol].change).toFixed(2)}%</span>
+                              <span style={{ fontSize:10, color:quotes[a.symbol].change>=0?C.green:C.red }}>{quotes[a.symbol].change>=0?"â²":"â¼"} {Math.abs(quotes[a.symbol].change).toFixed(2)}%</span>
                             </div>
                           )}
                           {a.signal && (
@@ -1838,7 +1838,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               </div>
 
               <div style={{ marginTop:10, fontSize:9, color:C.textDim, textAlign:"center" }}>
-                Watching {portfolio.length} holding{portfolio.length!==1?"s":""} · alerts refresh on load and manually
+                Watching {portfolio.length} holding{portfolio.length!==1?"s":""} Â· alerts refresh on load and manually
               </div>
             </>
           )}
@@ -1846,7 +1846,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-    // ── Section helper ───────────────────────────────────────────────────────────
+    // ââ Section helper âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function Section({ label, children, C, last }) {
       return (
         <div style={{ marginBottom:last?0:16, paddingBottom:last?0:16, borderBottom:last?"none":`1px solid ${C.border}` }}>
@@ -1856,7 +1856,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-    // ── Settings Panel ───────────────────────────────────────────────────────────
+    // ââ Settings Panel âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function SettingsPanel({ C, darkMode, setDarkMode, notifications, setNotifications, onClose, currentUser, onSignOut }) {
 
       return (
@@ -1864,10 +1864,10 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           <div onClick={e=>e.stopPropagation()} style={{ marginTop:56, marginRight:14, width:320, background:darkMode?"#090e1c":"#ffffff", border:`1px solid ${C.border}`, borderRadius:12, padding:20, boxShadow:"0 20px 60px #00000088", animation:"slideIn 0.2s both", maxHeight:"calc(100vh - 80px)", overflowY:"auto" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
               <span style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:"0.1em" }}>SETTINGS</span>
-              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer" }}>✕</button>
+              <button onClick={onClose} style={{ background:"none", border:"none", color:C.textMuted, fontSize:16, cursor:"pointer" }}>â</button>
             </div>
 
-            {/* API Status — server-side keys, no user input needed */}
+            {/* API Status â server-side keys, no user input needed */}
             <Section label="DATA SOURCES" C={C}>
               <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                 {[
@@ -1880,7 +1880,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                       <div style={{ fontSize:10, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>{label}</div>
                       <div style={{ fontSize:10, color:C.textMuted, marginTop:2 }}>{desc}</div>
                     </div>
-                    <span style={{ fontSize:10, color:color }}>● Live</span>
+                    <span style={{ fontSize:10, color:color }}>â Live</span>
                   </div>
                 ))}
               </div>
@@ -1927,9 +1927,9 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-    // ── Main App ─────────────────────────────────────────────────────────────────
+    // ââ Main App âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     
-    // ── Watchlist Tab ─────────────────────────────────────────────────────────────
+    // ââ Watchlist Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function WatchlistTab({ C, finnhubKey, watchlist, setWatchlist }) {
       const [quotes, setQuotes] = React.useState({});
       const [loading, setLoading] = React.useState(false);
@@ -1955,14 +1955,14 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
             <div style={{ fontSize:12, fontWeight:700, color:C.text, letterSpacing:'0.08em' }}>WATCHLIST</div>
             <button onClick={refresh} disabled={loading} style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'5px 12px', color:C.textMuted, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:'pointer' }}>
-              {loading ? '···' : '↻ REFRESH'}
+              {loading ? 'Â·Â·Â·' : 'â» REFRESH'}
             </button>
           </div>
           {watchlist.length === 0 ? (
             <div style={{ textAlign:'center', padding:'60px 20px', color:C.textMuted }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>👁</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>ð</div>
               <div style={{ fontSize:16, fontWeight:600, color:C.text, marginBottom:8 }}>Your watchlist is empty</div>
-              <div style={{ fontSize:12 }}>Go to Search and click 👁 WATCH on any stock</div>
+              <div style={{ fontSize:12 }}>Go to Search and click ð WATCH on any stock</div>
             </div>
           ) : (
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
@@ -1985,14 +1985,14 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                         <>
                           <div style={{ textAlign:'right' }}>
                             <div style={{ fontWeight:700, color:C.text, fontSize:16, fontFamily:"'DM Mono',monospace" }}>${q.price.toFixed(2)}</div>
-                            <div style={{ fontSize:11, color:isUp?C.green:C.red, marginTop:2 }}>{isUp?'▲':'▼'} {Math.abs(q.change).toFixed(2)}%</div>
+                            <div style={{ fontSize:11, color:isUp?C.green:C.red, marginTop:2 }}>{isUp?'â²':'â¼'} {Math.abs(q.change).toFixed(2)}%</div>
                           </div>
                         </>
                       ) : (
                         <div style={{ color:C.textDim, fontSize:12 }}>Loading...</div>
                       )}
                       <button onClick={()=>setWatchlist(prev=>prev.filter(s=>s!==sym))}
-                        style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'6px 10px', color:C.textMuted, fontSize:11, cursor:'pointer' }}>✕</button>
+                        style={{ background:'none', border:'1px solid '+C.border, borderRadius:6, padding:'6px 10px', color:C.textMuted, fontSize:11, cursor:'pointer' }}>â</button>
                     </div>
                   </div>
                 );
@@ -2026,7 +2026,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       {sym:"PLTR",  l:"PLTR"},
     ];
 
-    // ── COMPARE TAB ─────────────────────────────────────────────────────────────
+    // ââ COMPARE TAB âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function CompareTab({ C, finnhubKey, portfolio }) {
       const [symA, setSymA] = useState(portfolio[0]?.symbol || "");
       const [symB, setSymB] = useState(portfolio[1]?.symbol || "");
@@ -2140,14 +2140,14 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         return (
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, padding:"10px 0", borderBottom:`1px solid ${C.border}` }}>
             <div style={{ fontSize:11, color:C.textMuted, display:"flex", alignItems:"center" }}>{label}</div>
-            <div style={{ fontSize:13, fontWeight:600, color: aWins===true ? C.green : aWins===false ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valA) : valA ?? "—"}</div>
-            <div style={{ fontSize:13, fontWeight:600, color: aWins===false ? C.green : aWins===true ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valB) : valB ?? "—"}</div>
+            <div style={{ fontSize:13, fontWeight:600, color: aWins===true ? C.green : aWins===false ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valA) : valA ?? "â"}</div>
+            <div style={{ fontSize:13, fontWeight:600, color: aWins===false ? C.green : aWins===true ? C.red : C.text, textAlign:"center", fontFamily:"'DM Mono',monospace" }}>{format ? format(valB) : valB ?? "â"}</div>
           </div>
         );
       }
 
-      const fmt$ = v => v != null ? `$${parseFloat(v).toFixed(2)}` : "—";
-      const fmtPct = v => v != null ? `${parseFloat(v).toFixed(2)}%` : "—";
+      const fmt$ = v => v != null ? `$${parseFloat(v).toFixed(2)}` : "â";
+      const fmtPct = v => v != null ? `${parseFloat(v).toFixed(2)}%` : "â";
 
       return (
         <div>
@@ -2217,7 +2217,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                     <div style={{ fontSize:22, fontWeight:800, color, fontFamily:"'Space Mono',monospace" }}>{d.symbol}</div>
                     <div style={{ fontSize:28, fontWeight:700, color:C.text, marginTop:4, fontFamily:"'DM Mono',monospace" }}>${d.c?.toFixed(2)}</div>
                     <div style={{ fontSize:13, color: d.dp >= 0 ? C.green : C.red, marginTop:4, fontWeight:600 }}>
-                      {d.dp >= 0 ? "▲" : "▼"} {Math.abs(d.dp)?.toFixed(2)}% today
+                      {d.dp >= 0 ? "â²" : "â¼"} {Math.abs(d.dp)?.toFixed(2)}% today
                     </div>
                     <div style={{ display:"flex", gap:16, marginTop:12 }}>
                       <div><div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.08em" }}>HIGH</div><div style={{ fontSize:12, color:C.text, fontFamily:"'DM Mono',monospace" }}>${d.h?.toFixed(2)}</div></div>
@@ -2289,14 +2289,14 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 {normA.length > 0 && normB.length > 0 && (
                   <StatRow label="30-Day Return" valA={normA[normA.length-1]?.pct} valB={normB[normB.length-1]?.pct} format={fmtPct} higherIsBetter={true} />
                 )}
-                <div style={{ fontSize:10, color:C.textMuted, marginTop:12 }}>🟢 Green = better value for that metric</div>
+                <div style={{ fontSize:10, color:C.textMuted, marginTop:12 }}>ð¢ Green = better value for that metric</div>
               </div>
             </>
           )}
 
           {!dataA && !dataB && !loading && (
             <div style={{ textAlign:"center", padding:"60px 0", color:C.textMuted }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>⚖️</div>
+              <div style={{ fontSize:32, marginBottom:12 }}>âï¸</div>
               <div style={{ fontSize:14, fontWeight:600, color:C.text, marginBottom:6 }}>Compare any two stocks</div>
               <div style={{ fontSize:12 }}>Enter two ticker symbols above and hit Compare</div>
             </div>
@@ -2305,10 +2305,10 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       );
     }
 
-        // ── Supabase client ──────────────────────────────────────────────────────
+        // ââ Supabase client ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     const _supabase = window.supabase.createClient("https://vkrwxdtzolvecpfwhoir.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcnd4ZHR6b2x2ZWNwZndob2lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjYzOTgsImV4cCI6MjA4OTAwMjM5OH0.9yxfmKvvLDaFfLpsX5LYz2oRnTWT08oMmdSXiG8zjY8");
 
-        // ── Auth Screen ──────────────────────────────────────────────────────────
+        // ââ Auth Screen ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function AuthScreen({ C, onAuth }) {
       const [mode, setMode] = useState("signin");
       const [email, setEmail] = useState("");
@@ -2429,7 +2429,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
         return () => subscription.unsubscribe();
       }, []);
 
-      // API keys — entered via Settings, persisted to localStorage
+      // API keys â entered via Settings, persisted to localStorage
       const [anthropicKey, setAnthropicKey]   = useState("server");
       const [finnhubKey, setFinnhubKey]       = useState("server");
       const [newsKey, setNewsKey]             = useState("server");
@@ -2438,7 +2438,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       useEffect(() => { try { localStorage.setItem("stocker_finnhub_key", finnhubKey); } catch {} }, [finnhubKey]);
       useEffect(() => { try { localStorage.setItem("stocker_news_key", newsKey); } catch {} }, [newsKey]);
 
-      // Portfolio — loaded from Supabase, persisted on change
+      // Portfolio â loaded from Supabase, persisted on change
       const [portfolio, setPortfolio] = useState([]);
 
       // Load portfolio from Supabase when user logs in
@@ -2451,9 +2451,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       // Save portfolio to Supabase on every change
       useEffect(() => {
         if (!currentUser?.id) return;
-        _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-        try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
-      }, [portfolio]);
+        _supabase.auth.getSession().then(({data:{session}})=>{ if(!session?.user?.id) return; const uid=session.user.id; try{localStorage.setItem("sp_"+uid,JSON.stringify(portfolio));}catch{} _supabase.from("portfolios").upsert({user_id:uid,holdings:portfolio,updated_at:new Date().toISOString()},{onConflict:"user_id"});}
 
       // Persist API keys
       const [_keysLoaded] = useState(() => {
@@ -2511,7 +2509,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
 
       useEffect(() => { fetchLivePrices(); }, [fetchLivePrices]);
 
-      // Dedicated ticker fetch — random picks, refreshes every 90 seconds
+      // Dedicated ticker fetch â random picks, refreshes every 90 seconds
       const fetchTicker = useCallback(async () => {
         if (!finnhubKey) return;
         try {
@@ -2591,10 +2589,10 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             <SettingsPanel C={C} darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} setNotifications={setNotifications} onClose={()=>setShowSettings(false)} currentUser={currentUser} onSignOut={handleSignOut}/>
           )}
 
-          {/* ── TOP NAVBAR ── */}
+          {/* ââ TOP NAVBAR ââ */}
           <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, height:60, borderBottom:`1px solid ${C.border}`, background:darkMode ? "rgba(4,6,15,0.96)" : "rgba(255,255,255,0.97)", backdropFilter:"blur(20px)", display:"flex", alignItems:"stretch" }}>
 
-            {/* Logo zone — hardcoded bg so ticker can NEVER bleed over it */}
+            {/* Logo zone â hardcoded bg so ticker can NEVER bleed over it */}
             <div style={{ width:220, flexShrink:0, display:"flex", alignItems:"center", paddingLeft:24, position:"relative", zIndex:999, backgroundColor:darkMode?"#04060f":"#ffffff" }}>
               <div style={{ display:"flex", alignItems:"baseline", gap:4, fontFamily:"'DM Mono',monospace", fontWeight:700, letterSpacing:"0.16em" }}>
                 <span style={{ fontSize:20, color:C.cyan }}>STOCKR</span>
@@ -2602,18 +2600,18 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               </div>
             </div>
 
-            {/* Spacer — pushes right controls to far right */}
+            {/* Spacer â pushes right controls to far right */}
             <div style={{ flex:1 }}/>
 
-            {/* Right controls — pinned to far right */}
+            {/* Right controls â pinned to far right */}
             <div style={{ flexShrink:0, display:"flex", alignItems:"center", gap:10, paddingRight:20, paddingLeft:16, borderLeft:`1px solid ${C.border}` }}>
               <div style={{ textAlign:"right" }}>
                 <div style={{ fontSize:15, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>${totalValue.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
-                <div style={{ fontSize:10, color:dayGain>=0?C.green:C.red }}>{dayGain>=0?"▲":"▼"} ${Math.abs(dayGain).toFixed(2)}</div>
+                <div style={{ fontSize:10, color:dayGain>=0?C.green:C.red }}>{dayGain>=0?"â²":"â¼"} ${Math.abs(dayGain).toFixed(2)}</div>
               </div>
               <div style={{ width:1, height:28, background:C.border }}/>
               <button onClick={()=>setDarkMode(d=>!d)} title={darkMode?"Light mode":"Dark mode"} style={{ background:"none", border:`1px solid ${C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.textMuted, transition:"all 0.2s", fontSize:14 }}>
-                {darkMode ? "☀" : "🌙"}
+                {darkMode ? "â" : "ð"}
               </button>
               <button onClick={()=>setShowSettings(s=>!s)} title="Settings" style={{ background:showSettings?`${C.cyan}20`:"none", border:`1px solid ${showSettings?C.cyan+"60":C.border}`, borderRadius:8, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", transition:"all 0.2s" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={showSettings?C.cyan:C.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2623,10 +2621,10 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             </div>
           </nav>
 
-          {/* ── TICKER BAR — below navbar, full width, isolated ── */}
+          {/* ââ TICKER BAR â below navbar, full width, isolated ââ */}
           <div style={{ position:"fixed", top:60, left:0, right:0, zIndex:99, height:36, borderBottom:`1px solid ${C.border}`, backgroundColor:darkMode?"#04060f":"#ffffff", overflow:"hidden", display:"flex", alignItems:"center" }}>
             {(() => {
-              const placeholders = !finnhubKey ? TICKER_POOL.slice(0,12).map(p => ({ ...p, v:"—", c:"—" })) : [];
+              const placeholders = !finnhubKey ? TICKER_POOL.slice(0,12).map(p => ({ ...p, v:"â", c:"â" })) : [];
               const display = tickerItems.length ? tickerItems : placeholders;
               return (
                 <div style={{ display:"flex", gap:0, animation: display.length ? "tickerScroll 40s linear infinite" : "none", width:"max-content", flexShrink:0 }}>
@@ -2634,7 +2632,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                     <div key={i} style={{ flexShrink:0, padding:"0 24px", display:"flex", gap:10, alignItems:"center", borderRight:`1px solid ${C.border}` }}>
                       <span style={{ fontSize:10, color:C.textMuted, fontWeight:600, fontFamily:"'DM Mono',monospace", letterSpacing:"0.05em" }}>{m.l}</span>
                       <span style={{ fontSize:11, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace" }}>{m.v}</span>
-                      <span style={{ fontSize:10, fontWeight:600, color:!m.c||m.c==="—"?C.textMuted:m.c.startsWith("+")?C.green:C.red }}>{m.c||"—"}</span>
+                      <span style={{ fontSize:10, fontWeight:600, color:!m.c||m.c==="â"?C.textMuted:m.c.startsWith("+")?C.green:C.red }}>{m.c||"â"}</span>
                     </div>
                   ))}
                 </div>
@@ -2642,10 +2640,10 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
             })()}
           </div>
 
-          {/* ── MAIN BODY (below navbar + ticker) ── */}
+          {/* ââ MAIN BODY (below navbar + ticker) ââ */}
           <div style={{ display:"flex", paddingTop:96, minHeight:"100vh", position:"relative", zIndex:1 }}>
 
-            {/* ── LEFT SIDEBAR ── */}
+            {/* ââ LEFT SIDEBAR ââ */}
             <aside style={{ width:220, flexShrink:0, position:"fixed", top:96, bottom:0, left:0, borderRight:`1px solid ${C.border}`, background:darkMode ? "rgba(4,6,15,0.98)" : "rgba(255,255,255,0.98)", backdropFilter:"blur(10px)", display:"flex", flexDirection:"column", padding:"24px 12px", overflowY:"auto" }}>
 
               {/* Portfolio summary card */}
@@ -2653,7 +2651,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
                 <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,${C.cyan},${C.purple})` }}/>
                 <div style={{ fontSize:9, color:C.textMuted, letterSpacing:"0.12em", marginBottom:6 }}>TOTAL VALUE</div>
                 <div style={{ fontSize:22, fontWeight:700, color:C.text, fontFamily:"'DM Mono',monospace", letterSpacing:"-0.02em" }}>${totalValue.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
-                <div style={{ fontSize:11, color:dayGain>=0?C.green:C.red, marginTop:4 }}>{dayGain>=0?"▲":"▼"} ${Math.abs(dayGain).toFixed(2)} today</div>
+                <div style={{ fontSize:11, color:dayGain>=0?C.green:C.red, marginTop:4 }}>{dayGain>=0?"â²":"â¼"} ${Math.abs(dayGain).toFixed(2)} today</div>
                 <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${C.border}` }}>
                   <div style={{ display:"flex", justifyContent:"space-between", fontSize:10 }}>
                     <span style={{ color:C.textMuted }}>Holdings</span>
@@ -2685,7 +2683,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               </div>
             </aside>
 
-            {/* ── MOBILE BOTTOM NAV ── */}
+            {/* ââ MOBILE BOTTOM NAV ââ */}
             <div className="mobile-bottom-nav" style={{ display:"none", position:"fixed", bottom:0, left:0, right:0, zIndex:200, background:darkMode?"rgba(4,6,15,0.97)":"rgba(255,255,255,0.97)", backdropFilter:"blur(20px)", borderTop:`1px solid ${C.border}`, padding:"6px 4px", paddingBottom:"calc(6px + env(safe-area-inset-bottom))" }}>
               {NAV_ITEMS.map(item => (
                 <button key={item.id} onClick={()=>setTab(item.id)}
@@ -2701,7 +2699,7 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
               ))}
             </div>
 
-            {/* ── MAIN CONTENT ── */}
+            {/* ââ MAIN CONTENT ââ */}
             <main style={{ flex:1, marginLeft:"clamp(0px, 220px, 220px)", padding:"32px 40px", minHeight:"calc(100vh - 60px)", maxWidth:"calc(100vw - 220px)" }} className="main-content">
               <div key={tab} style={{ animation:"fadeIn 0.2s both", maxWidth:1100 }}>
                 {tab==="portfolio" && <PortfolioTab C={C} portfolio={portfolio} setPortfolio={setPortfolio} loadingPrices={loadingPrices} priceError={priceError} onRefresh={fetchLivePrices} finnhubKey={finnhubKey}/>}
