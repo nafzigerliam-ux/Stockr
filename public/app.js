@@ -320,7 +320,7 @@ const { useState, useEffect, useRef, useCallback } = React;
           {/* Candlestick Chart */}
           <div style={{ position:"relative" }} onMouseLeave={()=>setHover(null)}>
             <svg ref={svgRef} width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
-              style={{ display:"block", height:110, cursor:"crosshair" }}
+              style={{ display:"block", height:180, cursor:"crosshair" }}
               onMouseMove={handleMouseMove}>
               {[0.25,0.5,0.75].map(f=>(
                 <line key={f} x1={PAD} y1={PAD+f*(H-PAD*2)} x2={W-PAD} y2={PAD+f*(H-PAD*2)} stroke={C.border} strokeWidth="0.5"/>
