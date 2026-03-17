@@ -2445,14 +2445,12 @@ Use this data actively — synthesize it into insight rather than dumping raw nu
       useEffect(() => {
         if (!currentUser?.id) return;
         _supabase.from("portfolios").select("holdings").eq("user_id", currentUser.id).single()
-          .then(({ data }) => { if (data?.holdings) setPortfolio(data.holdings); });
+          .then(({ data }) => { if (data?.holdings && data.holdings.length > 0) setPortfolio(prev => data.holdings.length >= prev.length ? data.holdings : prev); });
       }, [currentUser?.id]);
 
       // Save portfolio to Supabase on every change
       useEffect(() => {
-        if (!currentUser?.id) return;
-        _supabase.from("portfolios").upsert({ user_id: currentUser.id, holdings: portfolio, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-        try { localStorage.setItem("stocker_portfolio_" + currentUser.id, JSON.stringify(portfolio)); } catch {}
+        if (currentUser && currentUser.id) { try{localStorage.setItem("stocker_portfolio_"+currentUser.id,JSON.stringify(portfolio));}catch(e){} _supabase.from("portfolios").upsert({user_id:currentUser.id,holdings:portfolio,updated_at:new Date().toISOString()},{onConflict:"user_id"}); }
       }, [portfolio]);
 
       // Persist API keys
