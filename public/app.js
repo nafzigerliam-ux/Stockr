@@ -699,13 +699,11 @@ const { useState, useEffect, useRef, useCallback } = React;
                         <button onClick={e=>{e.stopPropagation();setConfirmDel(h.symbol);}} style={{ background:C.bgCard, border:`1px solid ${C.red}44`, borderRadius:4, padding:"2px 8px", color:C.red, fontSize:9, fontFamily:"'Space Mono',monospace", cursor:"pointer" }}>✕</button>
                       </div>
 
-                      {/* Logo */}
-                      <div style={{ width:38, height:38, borderRadius:8, background:`linear-gradient(135deg,${C.bg},${C.bgCardHover})`, border:`1px solid ${pos?C.green+"44":C.red+"44"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:9, fontWeight:700, color:pos?C.green:C.red, fontFamily:"'Space Mono',monospace" }}>{h.symbol.slice(0,2)}</div>
-
                       {/* Name + meta */}
                       <div>
                         <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:2 }}>
-                          <span style={{ fontSize:12, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>{h.symbol}</span>
+                          <span style={{ fontSize:13, fontWeight:700, color:C.text, fontFamily:"'Space Mono',monospace" }}>{h.symbol}</span>
+                          {h.name && <span style={{ fontSize:11, color:C.textMuted }}>{h.name}</span>}
                           <span style={{ fontSize:9, color:C.textMuted, border:`1px solid ${C.border}`, padding:"1px 5px", borderRadius:4 }}>{h.sector}</span>
                           {h.live && <span style={{ fontSize:8, color:C.green, border:`1px solid ${C.green}33`, padding:"1px 4px", borderRadius:3 }}>LIVE</span>}
                         </div>
