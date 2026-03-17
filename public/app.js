@@ -317,22 +317,36 @@ const { useState, useEffect, useRef, useCallback } = React;
             </div>
           </div>
 
-          {/* Chart */}
+          {/* Candlestick Chart */}
           <div style={{ position:"relative" }} onMouseLeave={()=>setHover(null)}>
             <svg ref={svgRef} width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
               style={{ display:"block", height:110, cursor:"crosshair" }}
               onMouseMove={handleMouseMove}>
-              <defs>
-                <linearGradient id="perfGradX" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity="0.28"/>
-                  <stop offset="100%" stopColor={color} stopOpacity="0"/>
-                </linearGradient>
-              </defs>
               {[0.25,0.5,0.75].map(f=>(
                 <line key={f} x1={PAD} y1={PAD+f*(H-PAD*2)} x2={W-PAD} y2={PAD+f*(H-PAD*2)} stroke={C.border} strokeWidth="0.5"/>
               ))}
-              <polygon points={`${PAD},${H} ${pts} ${W-PAD},${H}`} fill="url(#perfGradX)"/>
-              <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              {data.map((d,i) => {
+                const x = toX(i);
+                const candleW = Math.max(2, Math.min(8, (W-PAD*2)/data.length*0.6));
+                const open  = i===0 ? d.val*0.998 : data[i-1].val;
+                const close = d.val;
+                const high  = Math.max(open, close) * 1.002;
+                const low   = Math.min(open, close) * 0.998;
+                const isUp  = close >= open;
+                const col   = isUp ? C.green : C.red;
+                const yHigh = toY(high);
+                const yLow  = toY(low);
+                const yOpen = toY(open);
+                const yClose= toY(close);
+                const bodyTop = Math.min(yOpen, yClose);
+                const bodyH = Math.max(1, Math.abs(yClose - yOpen));
+                return (
+                  <g key={i}>
+                    <line x1={x} y1={yHigh} x2={x} y2={yLow} stroke={col} strokeWidth="1" opacity="0.7"/>
+                    <rect x={x - candleW/2} y={bodyTop} width={candleW} height={bodyH} fill={col} opacity="0.85" rx="0.5"/>
+                  </g>
+                );
+              })}
               {hover!=null && (
                 <>
                   <line x1={toX(hover)} y1={PAD} x2={toX(hover)} y2={H-PAD} stroke={color} strokeWidth="1" strokeDasharray="3,3" opacity="0.5"/>
